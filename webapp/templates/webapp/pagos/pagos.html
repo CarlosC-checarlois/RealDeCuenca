@@ -1,0 +1,252 @@
+{% extends 'cabezal.html' %}
+{% load static %}
+
+{% block titulo_pagina %}
+<title>Mis Pagos | QuitusArte</title>
+{% endblock %}
+
+{% block css_archivos %}
+<style>
+/* ======== ESTILOS GENERALES ======== */
+body { background-color: #f9fafc; }
+.titulo-pagos { font-weight: 700; color: #f5b301; }
+
+/* ======== TARJETAS ======== */
+.card-pago {
+  background: #fff;
+  border-radius: 15px;
+  border: 1px solid #eee;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+  transition: transform 0.2s ease;
+}
+.card-pago:hover { transform: scale(1.02); }
+.card-header {
+  background: #fff5da;
+  color: #f5b301;
+  font-weight: 600;
+  border-radius: 15px 15px 0 0;
+}
+.estado-pago {
+  font-size: 0.9rem;
+  border-radius: 5px;
+  padding: 4px 10px;
+  font-weight: 600;
+  display: inline-block;
+}
+.estado-pago.Pagado { background: #d1f5d3; color: #1b8f2e; }
+.estado-pago.Pendiente { background: #fff3cd; color: #856404; }
+.estado-pago.Anulado { background: #f8d7da; color: #842029; }
+
+/* ======== MENSAJES ======== */
+.mensaje-vacio { text-align: center; padding: 60px 0; }
+
+/* ======== PANEL ESTADÍSTICO ======== */
+.panel-estadistico {
+  background: #fff;
+  border-radius: 15px;
+  box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+  padding: 25px;
+}
+.chart-container { position: relative; height: 240px; }
+</style>
+{% endblock %}
+
+{% block contenido_pagina %}
+<section class="contexto-rapido_contenido_rapido_generales d-flex align-items-center justify-content-center text-center text-white">
+  <img src="{% static '/webapp/imagenes/carrito/carrito_imagen_1.png' %}" alt="Banner Servicios" class="imagen_contenido_rapido_generales">
+  <div class="overlay_contenido_rapido_generales"></div>
+  <div class="contenido_contenido_rapido_generales">
+    <h1 class="titulo_contenido_rapido_generales">Pagos</h1>
+    <p class="breadcrumb_contenido_rapido_generales">
+      <a href="{% url 'home' %}" class="link-breadcrumb_contenido_rapido_generales">Inicio</a> › Pagos
+    </p>
+  </div>
+</section>
+
+<section class="container py-5 mt-5">
+  <div class="text-center mb-5">
+    <h1 class="titulo-pagos">💳 Mis Pagos</h1>
+    <p class="text-muted">Consulta tus pagos registrados y estadísticas de tus gastos.</p>
+  </div>
+
+  <!-- Dashboard estadístico -->
+  <div id="panelEstadistico" class="panel-estadistico mb-5 d-none">
+    <div class="row text-center mb-4">
+      <div class="col-md-4">
+        <h5 class="text-muted">Total gastado</h5>
+        <h3 id="totalGasto" class="fw-bold text-success">$0.00</h3>
+      </div>
+      <div class="col-md-4">
+        <h5 class="text-muted">Pagos realizados</h5>
+        <h3 id="totalPagos" class="fw-bold text-warning">0</h3>
+      </div>
+      <div class="col-md-4">
+        <h5 class="text-muted">Último pago</h5>
+        <h3 id="ultimoPago" class="fw-bold text-primary">N/A</h3>
+      </div>
+    </div>
+
+    <div class="row g-4">
+      <div class="col-md-6">
+        <div class="chart-container">
+          <canvas id="chartFuentes"></canvas>
+        </div>
+      </div>
+      <div class="col-md-6">
+        <div class="chart-container">
+          <canvas id="chartMensual"></canvas>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Contenedor de pagos -->
+  <div id="contenedorPagos" class="row g-4"></div>
+
+  <!-- Mensaje si no hay pagos -->
+  <div id="mensajeVacio" class="mensaje-vacio d-none">
+    <i class="fa-solid fa-credit-card fa-3x text-warning mb-3"></i>
+    <p class="text-muted fs-5">No tienes pagos registrados actualmente.</p>
+    <a href="{% url 'reservas' %}" class="btn btn-outline-warning">Ir a Mis Reservas</a>
+  </div>
+</section>
+{% endblock %}
+
+{% block jvscript_archivos_defer %}
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<script>
+document.addEventListener("DOMContentLoaded", async () => {
+  const contenedorPagos = document.getElementById("contenedorPagos");
+  const mensajeVacio = document.getElementById("mensajeVacio");
+  const panelEstadistico = document.getElementById("panelEstadistico");
+  const totalGastoLbl = document.getElementById("totalGasto");
+  const totalPagosLbl = document.getElementById("totalPagos");
+  const ultimoPagoLbl = document.getElementById("ultimoPago");
+
+  const sesion = JSON.parse(localStorage.getItem("usuarioSesion") || "{}");
+  if (!sesion.isLoggedIn || !sesion.Id) {
+    Swal.fire({
+      title: "Sesión requerida",
+      text: "Por favor, inicia sesión para ver tus pagos.",
+      icon: "warning",
+      confirmButtonText: "Ir al inicio de sesión",
+      confirmButtonColor: "#FFD700"
+    }).then(() => window.location.href = "/login/");
+    return;
+  }
+  const usuarioId = sesion.Id;
+
+  async function cargarPagos() {
+    contenedorPagos.innerHTML = `
+      <div class="col-12 text-center py-4 text-muted">
+        <div class="spinner-border text-warning" role="status"></div>
+        <div class="small mt-2">Cargando pagos...</div>
+      </div>
+    `;
+
+    try {
+      const resp = await fetch(`/api/pagos/${usuarioId}/`);
+      const data = await resp.json();
+      contenedorPagos.innerHTML = "";
+
+      if (!data.exito || !data.pagos || data.pagos.length === 0) {
+        mensajeVacio.classList.remove("d-none");
+        panelEstadistico.classList.add("d-none");
+        return;
+      }
+
+      mensajeVacio.classList.add("d-none");
+      panelEstadistico.classList.remove("d-none");
+
+      let total = 0;
+      const pagosPorFuente = {};
+      const pagosMensuales = {};
+
+      data.pagos.forEach(pago => {
+        total += pago.Monto || 0;
+        const fuente = pago.Fuente || "Desconocida";
+        pagosPorFuente[fuente] = (pagosPorFuente[fuente] || 0) + pago.Monto;
+
+        const mes = pago.FechaPago ? pago.FechaPago.substring(0, 7) : "Sin fecha";
+        pagosMensuales[mes] = (pagosMensuales[mes] || 0) + pago.Monto;
+
+        const estadoClase = pago.Estado?.replace(/\s/g, '') || "Pendiente";
+        const tarjeta = document.createElement("div");
+        tarjeta.className = "col-md-6 col-lg-4";
+        tarjeta.innerHTML = `
+          <div class="card-pago h-100">
+            <div class="card-header d-flex justify-content-between align-items-center">
+              <span>Pago #${pago.PagoId}</span>
+              <span class="estado-pago ${estadoClase}">${pago.Estado || "N/A"}</span>
+            </div>
+            <div class="card-body">
+              <p><strong>Reserva ID:</strong> ${pago.ReservaId || "-"}</p>
+              <p><strong>Monto:</strong> <span class="text-success fw-bold">$${(pago.Monto || 0).toFixed(2)}</span></p>
+              <p><strong>Fuente:</strong> ${fuente}</p>
+              <p><strong>Transacción:</strong> ${pago.TransaccionReferencia || "-"}</p>
+              <p><strong>Estado de Reserva:</strong> ${pago.EstadoReserva || "-"}</p>
+              <hr>
+              <p class="text-muted small mb-1"><strong>Fecha de Pago:</strong> ${pago.FechaPago || "N/A"}</p>
+              <p class="text-muted small mb-1"><strong>Fecha de Registro:</strong> ${pago.FechaRegistro || "N/A"}</p>
+              <p class="text-muted small"><strong>Usuario:</strong> ${pago.NombreUsuario || pago.NombreUsuarioExterno || "Desconocido"}</p>
+            </div>
+          </div>
+        `;
+        contenedorPagos.appendChild(tarjeta);
+      });
+
+      // Estadísticas
+      totalGastoLbl.textContent = `$${total.toFixed(2)}`;
+      totalPagosLbl.textContent = data.pagos.length;
+      ultimoPagoLbl.textContent = data.pagos[0]?.FechaPago?.substring(0,10) || "N/A";
+
+      // === Chart 1: Fuente ===
+      new Chart(document.getElementById("chartFuentes"), {
+        type: "doughnut",
+        data: {
+          labels: Object.keys(pagosPorFuente),
+          datasets: [{
+            data: Object.values(pagosPorFuente),
+            backgroundColor: ["#f5b301", "#007bff", "#28a745", "#dc3545", "#6f42c1"],
+          }]
+        },
+        options: {
+          plugins: {
+            legend: { position: "bottom" },
+            title: { display: true, text: "Distribución por fuente" }
+          }
+        }
+      });
+
+      // === Chart 2: Mensual ===
+      new Chart(document.getElementById("chartMensual"), {
+        type: "bar",
+        data: {
+          labels: Object.keys(pagosMensuales),
+          datasets: [{
+            label: "Monto ($)",
+            data: Object.values(pagosMensuales),
+            backgroundColor: "#f5b301",
+          }]
+        },
+        options: {
+          scales: { y: { beginAtZero: true } },
+          plugins: { legend: { display: false }, title: { display: true, text: "Pagos por mes" } }
+        }
+      });
+
+    } catch (error) {
+      contenedorPagos.innerHTML = "";
+      mensajeVacio.classList.remove("d-none");
+      panelEstadistico.classList.add("d-none");
+      console.error("Error al cargar pagos:", error);
+      Swal.fire("Error", "Ocurrió un problema al cargar los pagos.", "error");
+    }
+  }
+
+  await cargarPagos();
+});
+</script>
+{% endblock %}

@@ -1,0 +1,161 @@
+{% extends "cabezal.html" %}
+{% load static %}
+
+{% block titulo_pagina %}
+<title>Inicio - QuitusArte</title>
+{% endblock %}
+
+{% block css_archivos %}
+<link rel="stylesheet" href="{% static 'webapp/css/inicio/index_inicio.css' %}" />
+{% endblock %}
+
+{% block contenido_pagina %}
+
+<!-- ==========================
+     HERO / PORTADA
+========================== -->
+<header class="hero-section_index_inicio d-flex align-items-center justify-content-center text-center text-white">
+    <!-- Imagen de fondo -->
+    <img src="{% static 'webapp/imagenes/inicio/index_Imagen_1.png' %}" alt="Fondo colonial de Cuenca" class="hero-bg_index_inicio" />
+
+    <!-- Capa oscura superpuesta -->
+    <div class="overlay_index_inicio"></div>
+
+    <!-- Contenido principal -->
+    <div class="hero-content_index_inicio">
+        <h1 class="titulo_index_inicio fw-bold">REALDECUENCA</h1>
+        <p class="subtitulo_index_inicio">HOSPEDAJE COLONIAL EN LA CIUDAD REAL</p>
+    </div>
+</header>
+
+<!-- ==========================
+     NUESTRA VISIÓN
+========================== -->
+<section class="nosotros_index_inicio text-center">
+    <div class="container py-5">
+        <h2 class="titulo-nosotros_index_inicio mb-4">Nuestra Visión</h2>
+        <p class="texto-nosotros_index_inicio mx-auto">
+            RealDeCuenca es una plataforma web que conecta a viajeros con la historia viva de Cuenca.
+            Promovemos estancias únicas en hoteles boutique, casas coloniales y haciendas patrimoniales,
+            permitiendo experimentar la esencia de la ciudad realista. Democratizamos el acceso al patrimonio
+            arquitectónico, impulsando un turismo con identidad, memorias compartidas y valor cultural.
+        </p>
+    </div>
+</section>
+
+<!-- ==========================
+     SERVICIOS DESTACADOS
+========================== -->
+<section class="servicios_index_inicio text-center text-white">
+    <div class="container py-5">
+        <h2 class="titulo-servicios_index_inicio mb-4">Hospedajes Disponibles</h2>
+        <div class="row g-4">
+            <div class="col-md-4">
+                <div class="card_index_inicio h-100">
+                    <img src="{% static 'webapp/imagenes/inicio/index_carousel_1.png' %}" class="img_index_inicio" alt="Hoteles Boutique" />
+                    <div class="contenido-card_index_inicio">
+                        <h5 class="titulo-card_index_inicio">Hoteles Boutique</h5>
+                        <p class="texto-card_index_inicio">Diseño colonial con detalles modernos y confort premium.</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-4">
+                <div class="card_index_inicio h-100">
+                    <img src="{% static 'webapp/imagenes/inicio/index_carousel_2.png' %}" class="img_index_inicio" alt="Casas Coloniales" />
+                    <div class="contenido-card_index_inicio">
+                        <h5 class="titulo-card_index_inicio">Casas Coloniales</h5>
+                        <p class="texto-card_index_inicio">Estancias históricas que cuentan siglos de tradición cuencana.</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-4">
+                <div class="card_index_inicio h-100">
+                    <img src="{% static 'webapp/imagenes/inicio/index_carousel_3.png' %}" class="img_index_inicio" alt="Haciendas" />
+                    <div class="contenido-card_index_inicio">
+                        <h5 class="titulo-card_index_inicio">Haciendas Patrimoniales</h5>
+                        <p class="texto-card_index_inicio">Experiencias rurales de descanso con herencia aristocrática.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- ==========================
+     HISTORIA / CONTEXTO
+========================== -->
+<section class="historia_index_inicio text-center text-white py-5">
+    <div class="container">
+        <h2 class="titulo-historia_index_inicio mb-4">Cuenca: Ciudad Real y Patrimonial</h2>
+        <p class="texto-historia_index_inicio mx-auto">
+            Cuenca, declarada Patrimonio Cultural de la Humanidad por la UNESCO, es un reflejo del realismo andino
+            y la elegancia colonial. Sus calles empedradas, balcones labrados y cúpulas majestuosas evocan
+            siglos de historia viva.
+        </p>
+        <p class="texto-historia_index_inicio mx-auto">
+            RealDeCuenca permite vivir esta experiencia de forma inmersiva, a través de espacios donde el pasado y
+            el presente conviven en armonía. Más que un hospedaje, ofrecemos memorias patrimoniales hechas alojamiento.
+        </p>
+    </div>
+</section>
+
+<!-- ==========================
+     INSPIRACIÓN
+========================== -->
+<section class="inspiracion_index_inicio text-center py-5">
+    <div class="container">
+        <h2 class="titulo-inspiracion_index_inicio mb-4">Nuestra Inspiración</h2>
+        <p class="texto-inspiracion_index_inicio mx-auto">
+            Nos inspiran las tradiciones de Cuenca, su arquitectura eterna y la calidez de sus habitantes.
+            Creemos que cada casa antigua tiene algo que enseñar y cada huésped tiene algo que descubrir.
+        </p>
+        <p class="texto-inspiracion_index_inicio mx-auto">
+            Por eso creamos RealDeCuenca, una forma de vivir la ciudad no solo como turista,
+            sino como parte de su legado vivo. Aquí, cada estancia es una historia y cada detalle, un homenaje.
+        </p>
+    </div>
+</section>
+
+<!-- ==========================
+     NUESTROS VALORES
+========================== -->
+<section class="inspiracion_index_inicio py-5">
+    <div class="container text-center">
+        <h2 class="titulo-inspiracion_index_inicio mb-5">Nuestros Valores</h2>
+        <div class="row g-4">
+            <div class="col-md-4">
+                <div class="valor-item_index_inicio p-4 h-100">
+                    <i class="fas fa-landmark icono-valores_index_inicio"></i>
+                    <h5 class="valor-titulo_index_inicio mt-3">Autenticidad</h5>
+                    <p class="texto-inspiracion_index_inicio">
+                        Respetamos el alma de cada espacio, manteniendo la esencia original de la Cuenca colonial.
+                    </p>
+                </div>
+            </div>
+
+            <div class="col-md-4">
+                <div class="valor-item_index_inicio p-4 h-100">
+                    <i class="fas fa-hands-helping icono-valores_index_inicio"></i>
+                    <h5 class="valor-titulo_index_inicio mt-3">Calidez Humana</h5>
+                    <p class="texto-inspiracion_index_inicio">
+                        La hospitalidad cuencana es parte de la experiencia que ofrecemos en cada reserva.
+                    </p>
+                </div>
+            </div>
+
+            <div class="col-md-4">
+                <div class="valor-item_index_inicio p-4 h-100">
+                    <i class="fas fa-leaf icono-valores_index_inicio"></i>
+                    <h5 class="valor-titulo_index_inicio mt-3">Sostenibilidad</h5>
+                    <p class="texto-inspiracion_index_inicio">
+                        Promovemos un turismo consciente que protege el entorno natural y cultural de Cuenca.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+{% endblock %}

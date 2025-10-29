@@ -1,0 +1,45 @@
+{% load static %}
+
+<nav class="navbar navbar-expand-lg fixed-top custom-navbar">
+    <div class="container-fluid">
+        <!-- Logo -->
+        <a class="navbar-brand d-flex align-items-center" href="{% url 'home' %}">
+            <img src="{% static 'webapp/imagenes/generales/Logo_Quitus_Arte.png' %}" alt="Logo QuitusArte"
+                 width="60"
+                 height="60" class="logo"/>
+        </a>
+
+        <!-- Botón móvil -->
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav"
+                aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+
+        <!-- Links -->
+        <div class="collapse navbar-collapse justify-content-end" id="navbarNav">
+            <ul class="navbar-nav align-items-center" id="navUsuario">
+
+                <li class="nav-item">
+                    <a class="nav-link {% if active_page == 'inicio' %}active{% endif %}" href="{% url 'home' %}">
+                        Inicio
+                    </a>
+                </li>
+
+                <li class="nav-item">
+                    <a class="nav-link {% if active_page == 'servicios' %}active{% endif %}"
+                       href="{% url 'servicios' %}">
+                        Servicios
+                    </a>
+                </li>
+
+                <li class="nav-item">
+                    <a class="nav-link {% if active_page == 'carrito' %}active{% endif %}"
+                       href="{% url 'carrito' %}">
+                        Carrito
+                    </a>
+                </li>
+
+            </ul>
+        </div>
+    </div>
+</nav>

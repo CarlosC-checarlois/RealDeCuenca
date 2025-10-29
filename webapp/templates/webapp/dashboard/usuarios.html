@@ -1,0 +1,230 @@
+{% extends 'cabezal.html' %}
+{% load static %}
+
+{% block titulo_pagina %}
+<title>CRUD Usuarios | Panel Admin</title>
+{% endblock %}
+
+{% block contenido_pagina %}
+        <!-- CONTEXTO RAPIDO -->
+    <!-- CONTEXTO RAPIDO -->
+    <!-- CONTEXTO RAPIDO -->
+    <section
+            class="contexto-rapido_contenido_rapido_generales d-flex align-items-center justify-content-center text-center text-white">
+        <!-- Imagen de fondo directa -->
+        <img src="{% static '/webapp/imagenes/dashboard/dashboard_imagen.png' %}" alt="Banner Servicios"
+             class="imagen_contenido_rapido_generales">
+
+        <!-- Capa oscura superpuesta -->
+        <div class="overlay_contenido_rapido_generales"></div>
+
+        <!-- Contenido central -->
+        <div class="contenido_contenido_rapido_generales">
+            <h1 class="titulo_contenido_rapido_generales">Dashboard</h1>
+            <p class="breadcrumb_contenido_rapido_generales">
+                <a href="/dashboard/" class="link-breadcrumb_contenido_rapido_generales">Dashboard</a> › Usuarios
+            </p>
+        </div>
+    </section>
+
+    <!-- CONTEXTO RAPIDO -->
+    <!-- CONTEXTO RAPIDO -->
+    <!-- CONTEXTO RAPIDO -->
+<section class="py-5 bg-light min-vh-100">
+  <div class="container">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+      <h2 class="fw-bold">Gestión de Usuarios</h2>
+      <button class="btn btn-warning fw-semibold" id="btnNuevoUsuario">
+        <i class="fa-solid fa-plus me-2"></i> Nuevo Usuario
+      </button>
+    </div>
+
+    <div class="card shadow-sm border-0">
+      <div class="card-body table-responsive">
+        <table class="table table-hover align-middle" id="tablaUsuarios">
+          <thead class="table-dark">
+            <tr>
+              <th>ID</th>
+              <th>Nombre</th>
+              <th>Email</th>
+              <th>Rol</th>
+              <th>Activo</th>
+              <th>Último Inicio</th>
+              <th class="text-center">Acciones</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td colspan="7" class="text-center text-muted py-4">
+                <div class="spinner-border text-warning" role="status"></div>
+                <p class="mt-2 mb-0">Cargando usuarios...</p>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Modal Crear/Editar -->
+<div class="modal fade" id="modalUsuario" tabindex="-1">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content border-0 shadow">
+      <div class="modal-header bg-warning text-dark">
+        <h5 class="modal-title fw-bold" id="tituloModal">Nuevo Usuario</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <form id="formUsuario">
+        <div class="modal-body">
+          <input type="hidden" id="idUsuario" />
+
+          <div class="mb-3">
+            <label for="nombreUsuario" class="form-label fw-semibold">Nombre</label>
+            <input type="text" class="form-control" id="nombreUsuario" required>
+          </div>
+
+          <div class="mb-3">
+            <label for="emailUsuario" class="form-label fw-semibold">Email</label>
+            <input type="email" class="form-control" id="emailUsuario" required>
+          </div>
+
+          <div class="mb-3">
+            <label for="rolUsuario" class="form-label fw-semibold">Rol</label>
+            <select id="rolUsuario" class="form-select">
+              <option value="Usuario">Usuario</option>
+              <option value="Administrador">Administrador</option>
+            </select>
+          </div>
+
+          <div class="form-check form-switch mb-3">
+            <input class="form-check-input" type="checkbox" id="esActivo" checked />
+            <label class="form-check-label" for="esActivo">Activo</label>
+          </div>
+        </div>
+
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+          <button type="submit" class="btn btn-warning fw-semibold">Guardar</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block jvscript_archivos_defer %}
+<script>
+document.addEventListener("DOMContentLoaded", () => {
+  const tabla = document.querySelector("#tablaUsuarios tbody");
+  const modal = new bootstrap.Modal(document.getElementById("modalUsuario"));
+  const form = document.getElementById("formUsuario");
+
+  async function cargarUsuarios() {
+    tabla.innerHTML = `
+      <tr><td colspan="7" class="text-center py-3 text-muted">Cargando...</td></tr>`;
+    try {
+      const resp = await fetch("/api/usuarios/");
+      const data = await resp.json();
+      if (!data.exito) throw new Error(data.error || "Error al obtener usuarios");
+
+      if (data.usuarios.length === 0) {
+        tabla.innerHTML = `<tr><td colspan="7" class="text-center text-muted py-3">No hay usuarios registrados.</td></tr>`;
+        return;
+      }
+
+      tabla.innerHTML = "";
+      data.usuarios.forEach(u => {
+        tabla.insertAdjacentHTML("beforeend", `
+          <tr>
+            <td>${u.Id}</td>
+            <td>${u.Nombre}</td>
+            <td>${u.Email}</td>
+            <td>${u.Rol}</td>
+            <td>${u.EsActivo ? "✅" : "❌"}</td>
+            <td>${u.UltimaFechainicioSesion || "-"}</td>
+            <td class="text-center">
+              <button class="btn btn-sm btn-outline-primary me-2" onclick="editarUsuario(${u.Id}, '${u.Nombre}', '${u.Email}', '${u.Rol}', ${u.EsActivo})">
+                <i class="fa-solid fa-pen"></i>
+              </button>
+              <button class="btn btn-sm btn-outline-danger" onclick="eliminarUsuario(${u.Id})">
+                <i class="fa-solid fa-trash"></i>
+              </button>
+            </td>
+          </tr>`);
+      });
+    } catch (err) {
+      console.error(err);
+      tabla.innerHTML = `<tr><td colspan="7" class="text-center text-danger py-3">Error al cargar usuarios.</td></tr>`;
+    }
+  }
+
+  cargarUsuarios();
+
+  document.getElementById("btnNuevoUsuario").addEventListener("click", () => {
+    form.reset();
+    document.getElementById("idUsuario").value = "";
+    document.getElementById("tituloModal").textContent = "Nuevo Usuario";
+    modal.show();
+  });
+
+  window.editarUsuario = (id, nombre, email, rol, activo) => {
+    document.getElementById("idUsuario").value = id;
+    document.getElementById("nombreUsuario").value = nombre;
+    document.getElementById("emailUsuario").value = email;
+    document.getElementById("rolUsuario").value = rol;
+    document.getElementById("esActivo").checked = activo;
+    document.getElementById("tituloModal").textContent = "Editar Usuario";
+    modal.show();
+  };
+
+  window.eliminarUsuario = async (id) => {
+    const confirm = await Swal.fire({
+      title: "¿Eliminar usuario?",
+      text: "Esta acción no se puede deshacer.",
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonText: "Sí, eliminar",
+      cancelButtonText: "Cancelar",
+      confirmButtonColor: "#d33"
+    });
+    if (!confirm.isConfirmed) return;
+
+    const resp = await fetch(`/api/usuarios/${id}/`, { method: "DELETE" });
+    const data = await resp.json();
+    Swal.fire(data.mensaje || "Resultado", "", data.eliminado ? "success" : "error");
+    cargarUsuarios();
+  };
+
+  form.addEventListener("submit", async (e) => {
+    e.preventDefault();
+    const id = document.getElementById("idUsuario").value;
+    const payload = {
+      Id: parseInt(id) || 0,
+      Nombre: document.getElementById("nombreUsuario").value.trim(),
+      Email: document.getElementById("emailUsuario").value.trim(),
+      Rol: document.getElementById("rolUsuario").value,
+      EsActivo: document.getElementById("esActivo").checked,
+      FechaRegistro: new Date().toISOString(),
+      UltimaFechaCambio: new Date().toISOString(),
+      PasswordHash: "placeholder", // (o lo que definas tú)
+      UltimaFechainicioSesion: new Date().toISOString()
+    };
+
+    const method = id ? "PUT" : "POST";
+    const url = id ? `/api/usuarios/${id}/` : "/api/usuarios/";
+
+    const resp = await fetch(url, {
+      method,
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload)
+    });
+
+    const data = await resp.json();
+    Swal.fire(data.mensaje || "Resultado", "", data.insertado || data.actualizado ? "success" : "error");
+    modal.hide();
+    cargarUsuarios();
+  });
+});
+</script>
+{% endblock %}

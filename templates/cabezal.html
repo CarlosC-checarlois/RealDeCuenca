@@ -1,0 +1,411 @@
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="en" style="
+scroll-behavior: smooth;
+">
+<head>
+    <meta charset="utf-8">
+
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+
+    {% block titulo_pagina %}
+    {% endblock %}
+    {% block sobreescribir_css_archivos %}
+        <style>
+            body {
+                font-family: 'Segoe UI', sans-serif;
+            }
+        </style>
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
+        <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet"/>
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
+        <link rel="stylesheet" href="{% static 'webapp/css/generales/cabecera_generales.css' %}"/>
+        <link rel="stylesheet" href="{% static 'webapp/css/generales/footer_generales.css' %}"/>
+        <link rel="stylesheet" href="{% static 'webapp/css/generales/contenido_rapido_generales.css' %}"/>
+        {% block css_archivos %}
+
+        {% endblock %}
+    {% endblock %}
+    {% block sobreescribir_jvscript_archivos %}
+        {% block jvscript_archivos %}
+        {% endblock %}
+    {% endblock %}
+</head>
+<body>
+{% block sobreescribir_contenido_pagina %}
+    {% if messages %}
+        <div class="container mt-3">
+            {% for message in messages %}
+                <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                    {{ message }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+            {% endfor %}
+        </div>
+    {% endif %}
+<nav class="navbar navbar-expand-lg fixed-top custom-navbar">
+    <div class="container-fluid">
+        <!-- Logo -->
+        <a class="navbar-brand d-flex align-items-center" href="{% url 'home' %}">
+            <img src="{% static 'webapp/imagenes/generales/Logo_Quitus_Arte.png' %}" alt="Logo QuitusArte"
+                 width="60"
+                 height="60" class="logo"/>
+        </a>
+
+        <!-- Botón móvil -->
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav"
+                aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+
+        <!-- Links -->
+        <div class="collapse navbar-collapse justify-content-end" id="navbarNav">
+            <ul class="navbar-nav align-items-center" id="navUsuario">
+
+                <li class="nav-item">
+                    <a class="nav-link {% if active_page == 'inicio' %}active{% endif %}" href="{% url 'home' %}">
+                        Inicio
+                    </a>
+                </li>
+
+                <li class="nav-item">
+                    <a class="nav-link {% if active_page == 'servicios' %}active{% endif %}"
+                       href="{% url 'servicios' %}">
+                        Servicios
+                    </a>
+                </li>
+
+                <li class="nav-item">
+                    <a class="nav-link {% if active_page == 'carrito' %}active{% endif %}"
+                       href="{% url 'carrito' %}">
+                        Carrito
+                    </a>
+                </li>
+
+            </ul>
+        </div>
+    </div>
+</nav>
+
+
+    {% block contenido_pagina %}
+    {% endblock %}
+    {% include 'extensiones/footer.html' %}
+{% endblock %}
+
+{% block sobreescribir_jvscript_archivos_defer %}
+    <script src="{% static 'webapp/js/generales/jquery-3.7.1.js' %}"></script>
+    <script src="{% static 'webapp/js/generales/bootstrap.bundle.js' %}"></script>
+    <script src="{% static 'webapp/js/generales/jquery.validate.js' %}"></script>
+    <script src="{% static 'webapp/js/generales/jquery.validate.unobtrusive.js' %}"></script>
+    <script src="{% static 'webapp/js/generales/modernizr-2.8.3.js' %}"></script>
+    <script>
+        // Simulación de usuario guardado (se puede conectar con backend real)
+        const usuario = {
+            id: "{{ request.session.usuario_id|default:'' }}",
+            nombre: "{{ request.session.usuario_nombre|default:'' }}",
+            rol: "{{ request.session.usuario_rol|default:'' }}"
+        };
+
+        if (usuario.id) {
+            sessionStorage.setItem("usuarioQuitusArte", JSON.stringify(usuario));
+        } else {
+            sessionStorage.removeItem("usuarioQuitusArte");
+        }
+    </script>
+
+
+
+
+    {% block jvscript_archivos_defer %}
+    {% endblock %}
+    <script>
+        /* ==========================================================
+           🛒 MÓDULO DE GESTIÓN DE CARRITO DE RESERVAS
+           Autor: QuitusArte / RealDeCuenca
+           Descripción:
+           Maneja carrito persistente con vigencia de sesión mensual
+           ========================================================== */
+        (function () {
+
+            // ================================
+            // 🧱 CONSTANTES DE CONFIGURACIÓN
+            // ================================
+            const CARRITO_KEY = "carritoReservas";
+            const TOKEN_KEY = "tokenSesion";
+            const TOKEN_FECHA_KEY = "tokenSesion_fechaCreacion";
+            const TOKEN_VIGENCIA_DIAS = 30; // 1 mes
+
+            // ================================
+            // 🧮 FUNCIONES AUXILIARES
+            // ================================
+            function generarUUID() {
+                return self.crypto?.randomUUID?.() || Math.random().toString(36).substring(2) + Date.now();
+            }
+
+            function diasTranscurridos(fechaInicio, fechaFin) {
+                const msPorDia = 1000 * 60 * 60 * 24;
+                return Math.floor((fechaFin - fechaInicio) / msPorDia);
+            }
+
+            function tokenValido() {
+                const fechaStr = localStorage.getItem(TOKEN_FECHA_KEY);
+                if (!fechaStr) return false;
+                const fechaCreacion = new Date(fechaStr);
+                const ahora = new Date();
+                const dias = diasTranscurridos(fechaCreacion, ahora);
+                return dias < TOKEN_VIGENCIA_DIAS;
+            }
+
+            // ================================
+            // 🔑 TOKEN DE SESIÓN PERSISTENTE
+            // ================================
+            let tokenSesion = localStorage.getItem(TOKEN_KEY);
+            if (!tokenSesion || !tokenValido()) {
+                tokenSesion = generarUUID();
+                localStorage.setItem(TOKEN_KEY, tokenSesion);
+                localStorage.setItem(TOKEN_FECHA_KEY, new Date().toISOString());
+                console.log("🔑 Nuevo TokenSesion generado:", tokenSesion);
+            } else {
+                console.log("♻️ TokenSesion válido:", tokenSesion);
+            }
+
+            // ================================
+            // 🛒 FUNCIÓN: CREAR NUEVO CARRITO
+            // ================================
+            function crearCarritoBase() {
+                const nuevoCarrito = {
+                    UsuarioId: null,
+                    UsuarioExternoId: null,
+                    TokenCarrito: generarUUID(),
+                    TokenSesionActual: tokenSesion,
+                    FechaInicio: null,
+                    FechaFinal: null,
+                    ListaEspacios: [],
+                    Comentarios: null
+                };
+                localStorage.setItem(CARRITO_KEY, JSON.stringify(nuevoCarrito));
+                return nuevoCarrito;
+            }
+
+            // ================================
+            // 📦 OBTENER O CREAR CARRITO
+            // ================================
+            function obtenerCarrito() {
+                let carrito = null;
+                try {
+                    carrito = JSON.parse(localStorage.getItem(CARRITO_KEY));
+                    if (!carrito) carrito = crearCarritoBase();
+                } catch {
+                    carrito = crearCarritoBase();
+                }
+
+                // Mantener actualizado el token de sesión
+                carrito.TokenSesionActual = tokenSesion;
+                localStorage.setItem(CARRITO_KEY, JSON.stringify(carrito));
+                return carrito;
+            }
+
+            // ================================
+            // ➕ AGREGAR RESERVA AL CARRITO
+            // ================================
+            function agregarReserva(espacioId, fechaInicio, fechaFinal, imagenUrl = null) {
+                const carrito = obtenerCarrito();
+                if (!espacioId || !fechaInicio || !fechaFinal) {
+                    console.error("❌ Datos incompletos para agregar reserva");
+                    return;
+                }
+
+                const nuevaReserva = {
+                    EspacioId: parseInt(espacioId),
+                    FechaInicio: fechaInicio,
+                    FechaFinal: fechaFinal,
+                    ImagenUrl: imagenUrl
+                };
+
+
+                carrito.ListaEspacios.push(nuevaReserva);
+                localStorage.setItem(CARRITO_KEY, JSON.stringify(carrito));
+                window.CarritoReservas = carrito;
+
+                console.log("🛒 Reserva agregada:", nuevaReserva);
+                console.log("📦 Carrito actualizado:", carrito);
+            }
+
+            // ================================
+            // ❌ ELIMINAR RESERVA POR ÍNDICE
+            // ================================
+            function eliminarReserva(index) {
+                const carrito = obtenerCarrito();
+                if (index < 0 || index >= carrito.ListaEspacios.length) {
+                    console.warn("Índice inválido al eliminar reserva:", index);
+                    return;
+                }
+
+                const eliminado = carrito.ListaEspacios.splice(index, 1);
+                localStorage.setItem(CARRITO_KEY, JSON.stringify(carrito));
+                window.CarritoReservas = carrito;
+
+                console.log("🗑️ Reserva eliminada:", eliminado[0]);
+            }
+
+            // ================================
+            // 🧹 LIMPIAR CARRITO COMPLETO
+            // ================================
+            function vaciarCarrito() {
+                const carrito = crearCarritoBase();
+                localStorage.setItem(CARRITO_KEY, JSON.stringify(carrito));
+                window.CarritoReservas = carrito;
+                console.log("🧼 Carrito vaciado");
+            }
+
+            // ================================
+            // 💲 CALCULAR TOTALES ESTIMADOS
+            // ================================
+            function calcularTotales(costoPorDia) {
+                const carrito = obtenerCarrito();
+                let total = 0;
+                carrito.ListaEspacios.forEach(reserva => {
+                    const inicio = new Date(reserva.FechaInicio);
+                    const fin = new Date(reserva.FechaFinal);
+                    const dias = Math.max(1, Math.ceil((fin - inicio) / (1000 * 60 * 60 * 24)));
+                    total += dias * (costoPorDia || 0);
+                });
+                return total;
+            }
+
+            // ================================
+            // 🌍 EXPONER API GLOBAL
+            // ================================
+            window.CarritoManager = {
+                obtener: obtenerCarrito,
+                agregar: agregarReserva,
+                eliminar: eliminarReserva,
+                vaciar: vaciarCarrito,
+                calcularTotales: calcularTotales,
+                tokenSesion: tokenSesion
+            };
+
+            // Inicializar en memoria
+            window.CarritoReservas = obtenerCarrito();
+
+            console.log("✅ CarritoManager inicializado:", window.CarritoReservas);
+
+        })();
+    </script>
+    <!-- ========== NAV USUARIO DINÁMICO ========== -->
+
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script>
+document.addEventListener("DOMContentLoaded", async () => {
+    const navUsuario = document.getElementById("navUsuario");
+    const sesion = JSON.parse(localStorage.getItem("usuarioSesion") || "{}");
+    const _usuarioId = {{ view.kwargs.usuario_id|default:"0" }};
+
+    if (!sesion.isLoggedIn) {
+        navUsuario.insertAdjacentHTML("beforeend", `
+            <li class="nav-item">
+                <a class="nav-link" href="/login/">
+                    <i class="fa-solid fa-right-to-bracket me-1"></i> Iniciar Sesión
+                </a>
+            </li>
+        `);
+        return;
+    }
+
+    let nombreUsuario = sesion.Nombre || "Usuario";
+    let rolUsuario = (sesion.Rol || "Usuario").trim().toLowerCase();
+    let usuarioId = sesion.Id || 0;
+
+    try {
+        if (usuarioId > 0) {
+            const resp = await fetch(`/api/usuario/${usuarioId}/`);
+            const data = await resp.json();
+            if (data.exito && data.usuario) {
+                const u = data.usuario;
+                nombreUsuario = u.Nombre || nombreUsuario;
+                rolUsuario = (u.Rol || rolUsuario).trim().toLowerCase();
+                usuarioId = u.Id || usuarioId;
+                localStorage.setItem("usuarioSesion", JSON.stringify({
+                    ...sesion,
+                    Nombre: nombreUsuario,
+                    Rol: rolUsuario,
+                    Id: usuarioId
+                }));
+            }
+        }
+    } catch (err) {
+        console.warn("⚠️ No se pudo actualizar usuario desde API:", err);
+    }
+
+    let html = "";
+    if (rolUsuario === "administrador") {
+        html = `
+            <li class="nav-item">
+                <a class="nav-link" href="/dashboard">Panel Admin</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link text-danger fw-semibold" href="#" id="btnCerrarSesion">
+                    <i class="fa-solid fa-right-from-bracket me-1"></i> Cerrar Sesión
+                </a>
+            </li>
+        `;
+    } else {
+        html = `
+            <li class="nav-item"><a class="nav-link" href="/reservas/">Reservas</a></li>
+            <li class="nav-item"><a class="nav-link" href="/pago/">Pagos</a></li>
+            <li class="nav-item">
+                <a class="nav-link text-warning fw-semibold" href="/usuario/${usuarioId}/">
+                    <i class="fa-solid fa-user me-1"></i> ${nombreUsuario}
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link text-danger fw-semibold" href="#" id="btnCerrarSesion">
+                    <i class="fa-solid fa-right-from-bracket me-1"></i> Cerrar Sesión
+                </a>
+            </li>
+        `;
+    }
+
+    navUsuario.insertAdjacentHTML("beforeend", html);
+
+    // ✅ Función única de cierre
+    function cerrarSesion() {
+        localStorage.removeItem("usuarioSesion");
+        localStorage.removeItem("carritoReservas");
+
+        Swal.fire({
+            title: "Sesión cerrada",
+            text: "Has cerrado sesión correctamente.",
+            icon: "info",
+            confirmButtonColor: "#FFD700",
+            timer: 2000,
+            timerProgressBar: true,
+            showConfirmButton: false
+        }).then(() => {
+            window.location.href = "/login/";
+        });
+    }
+
+    // 🎯 Evento botón cerrar sesión
+    const btnCerrar = document.getElementById("btnCerrarSesion");
+    if (btnCerrar) btnCerrar.addEventListener("click", (e) => {
+        e.preventDefault();
+        cerrarSesion();
+    });
+});
+</script>
+
+
+    
+    
+    
+    
+
+    
+
+
+{% endblock %}
+</body>
+</html>

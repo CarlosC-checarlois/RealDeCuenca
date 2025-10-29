@@ -1,0 +1,260 @@
+{% extends "cabezal.html" %}
+{% load static %}
+
+{% block titulo_pagina %}
+    <title>Carrito de Reservas - QuitusArte</title>
+{% endblock %}
+{% block css_archivos %}
+    <link rel="stylesheet" href="{% static 'webapp/css/carrito/index_carrito.css' %}" />
+
+{% endblock %}
+{% block contenido_pagina %}
+<!-- CONTEXTO RAPIDO -->
+<!-- CONTEXTO RAPIDO -->
+<!-- CONTEXTO RAPIDO -->
+<section class="contexto-rapido_contenido_rapido_generales d-flex align-items-center justify-content-center text-center text-white">
+    <!-- Imagen de fondo directa -->
+    <img src="{% static '/webapp/imagenes/carrito/carrito_imagen_1.png' %}" alt="Banner Servicios" class="imagen_contenido_rapido_generales">
+
+    <!-- Capa oscura superpuesta -->
+    <div class="overlay_contenido_rapido_generales"></div>
+
+    <!-- Contenido central -->
+    <div class="contenido_contenido_rapido_generales">
+        <h1 class="titulo_contenido_rapido_generales">Carrito</h1>
+        <p class="breadcrumb_contenido_rapido_generales">
+            <a href="/" class="link-breadcrumb_contenido_rapido_generales">Inicio</a> › Carrito
+        </p>
+    </div>
+</section>
+
+<!-- CONTEXTO RAPIDO -->
+<!-- CONTEXTO RAPIDO -->
+<!-- CONTEXTO RAPIDO -->
+<section class="carrito_index_carrito py-5 mt-5">
+  <div class="container-lg">
+
+    <!-- 🛍️ Encabezado -->
+    <div class="text-center mb-5">
+      <h2 class="fw-bold text-dark">🛒 Carrito de Reservas</h2>
+      <p class="text-muted fs-6">Revisa y confirma los espacios seleccionados antes de completar tu reserva.</p>
+      <hr class="w-25 mx-auto border-warning opacity-75" />
+    </div>
+
+    <!-- Carrito vacío -->
+    <div id="carritoVacio" class="text-center d-none">
+      <i class="fa-solid fa-cart-arrow-down fa-3x text-warning mb-3"></i>
+      <p class="lead">Tu carrito está vacío.</p>
+      <a href="{% url 'servicios' %}" class="btn btn-outline-warning">Explorar servicios</a>
+    </div>
+
+    <div class="row">
+      <!-- 🏨 Lista dinámica -->
+      <div class="col-lg-8">
+        <div id="listaCarrito" class="vstack gap-4"></div>
+      </div>
+
+      <!-- 💰 Resumen Detallado -->
+      <div class="col-lg-4">
+        <div id="resumenCarrito" class="card shadow-sm d-none border-0">
+          <div class="card-body">
+            <h5 class="fw-bold text-dark mb-3">Resumen de pago</h5>
+            <div class="d-flex justify-content-between mb-2">
+              <span>Subtotal:</span>
+              <span id="subtotalCarrito" class="fw-semibold">$0.00</span>
+            </div>
+            <div class="d-flex justify-content-between mb-2">
+              <span>IVA (15%):</span>
+              <span id="ivaCarrito" class="fw-semibold">$0.00</span>
+            </div>
+            <hr>
+            <div class="d-flex justify-content-between align-items-center mb-3">
+              <span class="fw-bold text-dark fs-5">Total:</span>
+              <span id="totalCarrito" class="fw-bold fs-5 text-success">$0.00</span>
+            </div>
+            <p class="text-muted small mb-3">
+              Los precios incluyen impuestos y cargos por servicio.
+            </p>
+            <button id="btnConfirmar" class="btn btn-warning w-100 fw-semibold">
+              <i class="fa-solid fa-calendar-check me-2"></i> Confirmar Reservas
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+{% endblock %}
+
+{% block jvscript_archivos_defer %}
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script>
+document.addEventListener("DOMContentLoaded", async () => {
+  const lista = document.getElementById("listaCarrito");
+  const vacio = document.getElementById("carritoVacio");
+  const resumen = document.getElementById("resumenCarrito");
+  const subtotalEl = document.getElementById("subtotalCarrito");
+  const ivaEl = document.getElementById("ivaCarrito");
+  const totalEl = document.getElementById("totalCarrito");
+
+  // 🛒 Cargar carrito
+  const carrito = CarritoManager.obtener();
+  if (!carrito.ListaEspacios || carrito.ListaEspacios.length === 0) {
+    vacio.classList.remove("d-none");
+    resumen.classList.add("d-none");
+    return;
+  }
+
+  vacio.classList.add("d-none");
+  resumen.classList.remove("d-none");
+
+  let subtotalGeneral = 0;
+  let primeraFechaInicio = null;
+  let primeraFechaFinal = null;
+
+  // 🧾 Renderizar cada reserva
+  for (let i = 0; i < carrito.ListaEspacios.length; i++) {
+    const reserva = carrito.ListaEspacios[i];
+    const fechaInicio = new Date(reserva.FechaInicio);
+    const fechaFinal = new Date(reserva.FechaFinal);
+    if (i === 0) {
+      primeraFechaInicio = reserva.FechaInicio;
+      primeraFechaFinal = reserva.FechaFinal;
+    }
+
+    const dias = Math.max(1, Math.ceil((fechaFinal - fechaInicio) / (1000 * 60 * 60 * 24)));
+
+    // Cargar info del espacio
+    const resp = await fetch(`/servicios/detalle-json/${reserva.EspacioId}/`);
+    const data = await resp.json();
+    if (!data.success) continue;
+
+    const e = data.espacio;
+    const costoDia = parseFloat(e.CostoDiario || 0);
+    const subtotal = costoDia * dias;
+    subtotalGeneral += subtotal;
+
+    const div = document.createElement("div");
+    div.className = "card border-0 shadow-sm p-3";
+    div.innerHTML = `
+      <div class="d-flex flex-row align-items-start">
+        <img src="${reserva.ImagenUrl || (e.Imagenes && e.Imagenes[0]) || 'https://imageness3realdecuenca.s3.us-east-2.amazonaws.com/Imagen5.png'}"
+             alt="${e.Nombre}" class="rounded me-3" style="width: 130px; height: 100px; object-fit: cover;">
+        <div class="flex-grow-1">
+          <div class="d-flex justify-content-between">
+            <h5 class="text-warning fw-bold">${e.Nombre}</h5>
+            <button class="btn btn-light text-danger btn-sm border-0" data-index="${i}" title="Eliminar reserva">
+              <i class="fa-solid fa-trash-can"></i>
+            </button>
+          </div>
+          <p class="mb-1 text-muted small">${e.NombreHotel || "Hotel N/D"} · ${e.Ubicacion || "Ubicación N/D"}</p>
+          <p class="mb-0"><strong>Fechas:</strong> ${fechaInicio.toLocaleDateString()} – ${fechaFinal.toLocaleDateString()}</p>
+          <p class="mb-0"><strong>Días:</strong> ${dias}</p>
+          <p class="mb-0"><strong>Costo por día:</strong> $${costoDia.toFixed(2)}</p>
+          <p class="fw-semibold text-dark mt-2"><strong>Subtotal:</strong> $${subtotal.toFixed(2)}</p>
+        </div>
+      </div>
+    `;
+    lista.appendChild(div);
+  }
+
+  // 💰 Calcular totales
+  const iva = subtotalGeneral * 0.15;
+  const total = subtotalGeneral + iva;
+  subtotalEl.textContent = `$${subtotalGeneral.toFixed(2)}`;
+  ivaEl.textContent = `$${iva.toFixed(2)}`;
+  totalEl.textContent = `$${total.toFixed(2)}`;
+
+  // 🗑️ Eliminar item
+  lista.addEventListener("click", (ev) => {
+    const btn = ev.target.closest(".btn[data-index]");
+    if (!btn) return;
+    const index = parseInt(btn.dataset.index);
+    CarritoManager.eliminar(index);
+    location.reload();
+  });
+
+  // ✅ Confirmar pre-reserva
+  document.getElementById("btnConfirmar").addEventListener("click", async () => {
+    const sesion = JSON.parse(localStorage.getItem("usuarioSesion") || "{}");
+    if (!sesion.isLoggedIn || !sesion.Id) {
+      Swal.fire({
+        title: "Sesión requerida",
+        text: "Por favor, inicia sesión para confirmar tu reserva.",
+        icon: "warning",
+        confirmButtonText: "Iniciar sesión",
+        confirmButtonColor: "#FFD700"
+      }).then(() => window.location.href = "/login/");
+      return;
+    }
+
+    const confirm = await Swal.fire({
+      title: "Crear pre-reserva",
+      html: `
+        <p>Se generará una <strong>pre-reserva</strong> para los espacios seleccionados.</p>
+        <p class="text-muted small">Esto bloqueará temporalmente los espacios hasta el pago final.</p>
+        <p><strong>Total estimado:</strong> <span class="text-success">$${total.toFixed(2)}</span></p>
+      `,
+      icon: "question",
+      showCancelButton: true,
+      confirmButtonText: "Confirmar pre-reserva",
+      cancelButtonText: "Cancelar",
+      confirmButtonColor: "#FFD700"
+    });
+
+    if (!confirm.isConfirmed) return;
+
+    const body = {
+      UsuarioId: sesion.Id,
+      UsuarioExternoId: null,
+      FechaInicio: primeraFechaInicio,
+      FechaFinal: primeraFechaFinal,
+      ListaEspacios: carrito.ListaEspacios.map(e => e.EspacioId),
+      Comentarios: "Pre-reserva desde carrito",
+    };
+
+    try {
+      const resp = await fetch("/api/reservas/precrear/", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(body),
+      });
+
+      const data = await resp.json();
+
+      if (data.error) {
+        Swal.fire("Error", data.error, "error");
+        return;
+      }
+
+      // 💬 Mostrar resultado
+      await Swal.fire({
+        icon: "success",
+        title: "Pre-reserva creada",
+        html: `
+          <p><strong>Reserva ID:</strong> ${data.ReservaId}</p>
+          <p><strong>Estado:</strong> ${data.Estado || "Desconocido"}</p>
+          <p><strong>Mensaje:</strong> ${data.Mensaje || "Pre-reserva generada exitosamente."}</p>
+          ${
+            data.MinutosRetencion
+              ? `<p class="text-muted small">⏱️ Tienes <strong>${data.MinutosRetencion} minutos</strong> para confirmar el pago.</p>`
+              : ""
+          }
+        `,
+        confirmButtonColor: "#FFD700",
+      });
+
+      // 🧹 Limpiar carrito y redirigir
+      CarritoManager.vaciar();
+      window.location.href = "/reservas/";
+
+    } catch (err) {
+      console.error("Error:", err);
+      Swal.fire("Error", "No se pudo crear la pre-reserva.", "error");
+    }
+  });
+});
+</script>
+{% endblock %}
+

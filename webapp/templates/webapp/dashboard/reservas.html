@@ -1,0 +1,263 @@
+{% extends 'cabezal.html' %}
+{% load static %}
+
+{% block titulo_pagina %}
+<title>Gestión de Reservas | Panel Admin</title>
+{% endblock %}
+
+{% block contenido_pagina %}
+        <!-- CONTEXTO RAPIDO -->
+    <!-- CONTEXTO RAPIDO -->
+    <!-- CONTEXTO RAPIDO -->
+    <section
+            class="contexto-rapido_contenido_rapido_generales d-flex align-items-center justify-content-center text-center text-white">
+        <!-- Imagen de fondo directa -->
+        <img src="{% static '/webapp/imagenes/dashboard/dashboard_imagen.png' %}" alt="Banner Servicios"
+             class="imagen_contenido_rapido_generales">
+
+        <!-- Capa oscura superpuesta -->
+        <div class="overlay_contenido_rapido_generales"></div>
+
+        <!-- Contenido central -->
+        <div class="contenido_contenido_rapido_generales">
+            <h1 class="titulo_contenido_rapido_generales">Dashboard</h1>
+            <p class="breadcrumb_contenido_rapido_generales">
+                <a href="/dashboard/" class="link-breadcrumb_contenido_rapido_generales">Dashboard</a> › Reservas
+            </p>
+        </div>
+    </section>
+
+    <!-- CONTEXTO RAPIDO -->
+    <!-- CONTEXTO RAPIDO -->
+    <!-- CONTEXTO RAPIDO -->
+<section class="py-5 bg-light min-vh-100">
+  <div class="container">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+      <h2 class="fw-bold">Gestión de Reservas</h2>
+      <button class="btn btn-warning fw-semibold" id="btnNuevaReserva">
+        <i class="fa-solid fa-plus me-2"></i> Nueva Reserva
+      </button>
+    </div>
+
+    <div class="card shadow-sm border-0">
+      <div class="card-body table-responsive">
+        <table class="table table-hover align-middle" id="tablaReservas">
+          <thead class="table-dark">
+            <tr>
+              <th>ID</th>
+              <th>Usuario Interno</th>
+              <th>Usuario Externo</th>
+              <th>Estado</th>
+              <th>Costo Total</th>
+              <th>Activo</th>
+              <th>Fecha Registro</th>
+              <th class="text-center">Acciones</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td colspan="8" class="text-center text-muted py-4">
+                <div class="spinner-border text-warning" role="status"></div>
+                <p class="mt-2 mb-0">Cargando reservas...</p>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Modal Crear/Editar -->
+<div class="modal fade" id="modalReserva" tabindex="-1">
+  <div class="modal-dialog modal-lg modal-dialog-centered">
+    <div class="modal-content border-0 shadow">
+      <div class="modal-header bg-warning text-dark">
+        <h5 class="modal-title fw-bold" id="tituloModal">Nueva Reserva</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <form id="formReserva">
+        <div class="modal-body">
+          <input type="hidden" id="idReserva" />
+
+          <div class="row g-3">
+            <div class="col-md-6">
+              <label class="form-label fw-semibold">Usuario ID</label>
+              <input type="number" class="form-control" id="usuarioId" required />
+            </div>
+            <div class="col-md-6">
+              <label class="form-label fw-semibold">Usuario Externo ID</label>
+              <input type="number" class="form-control" id="usuarioExternoId" required />
+            </div>
+
+            <div class="col-md-6">
+              <label class="form-label fw-semibold">Estado</label>
+              <select id="estadoReserva" class="form-select">
+                <option>Pendiente</option>
+                <option>Confirmada</option>
+                <option>Cancelada</option>
+              </select>
+            </div>
+
+            <div class="col-md-6">
+              <label class="form-label fw-semibold">Comentarios</label>
+              <input type="text" class="form-control" id="comentariosReserva" />
+            </div>
+
+            <div class="col-md-4">
+              <label class="form-label fw-semibold">Subtotal</label>
+              <input type="number" step="0.01" class="form-control" id="costoSubtotal" required />
+            </div>
+            <div class="col-md-4">
+              <label class="form-label fw-semibold">IVA</label>
+              <input type="number" step="0.01" class="form-control" id="costoIVA" required />
+            </div>
+            <div class="col-md-4">
+              <label class="form-label fw-semibold">Total</label>
+              <input type="number" step="0.01" class="form-control" id="costoFinal" required />
+            </div>
+          </div>
+
+          <div class="form-check form-switch mt-3">
+            <input class="form-check-input" type="checkbox" id="esActivoReserva" checked />
+            <label class="form-check-label" for="esActivoReserva">Activo</label>
+          </div>
+        </div>
+
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+          <button type="submit" class="btn btn-warning fw-semibold">Guardar</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block jvscript_archivos_defer %}
+<script>
+document.addEventListener("DOMContentLoaded", () => {
+  const tabla = document.querySelector("#tablaReservas tbody");
+  const modal = new bootstrap.Modal(document.getElementById("modalReserva"));
+  const form = document.getElementById("formReserva");
+
+  async function cargarReservas() {
+    tabla.innerHTML = `<tr><td colspan="8" class="text-center py-3 text-muted">Cargando...</td></tr>`;
+    try {
+      const resp = await fetch("/api/reservas/");
+      const data = await resp.json();
+      if (!data.exito) throw new Error(data.error || "Error al obtener reservas");
+
+      if (data.reservas.length === 0) {
+        tabla.innerHTML = `<tr><td colspan="8" class="text-center text-muted py-3">No hay reservas registradas.</td></tr>`;
+        return;
+      }
+
+      tabla.innerHTML = "";
+      data.reservas.forEach(r => {
+        tabla.insertAdjacentHTML("beforeend", `
+          <tr>
+            <td>${r.Id}</td>
+            <td>${r.UsuarioId}</td>
+            <td>${r.UsuarioExternoId}</td>
+            <td>${r.Estado}</td>
+            <td>$${r.CostoFinal.toFixed(2)}</td>
+            <td>${r.EsActivo ? "✅" : "❌"}</td>
+            <td>${r.FechaRegistro || "-"}</td>
+            <td class="text-center">
+              <button class="btn btn-sm btn-outline-primary me-2" onclick="editarReserva(${r.Id}, '${r.Estado}', '${r.Comentarios}', ${r.CostoSubtotal}, ${r.CostoIVA}, ${r.CostoFinal}, ${r.UsuarioId}, ${r.UsuarioExternoId}, ${r.EsActivo})">
+                <i class="fa-solid fa-pen"></i>
+              </button>
+              <button class="btn btn-sm btn-outline-danger" onclick="eliminarReserva(${r.Id})">
+                <i class="fa-solid fa-trash"></i>
+              </button>
+            </td>
+          </tr>`);
+      });
+    } catch (err) {
+      console.error(err);
+      tabla.innerHTML = `<tr><td colspan="8" class="text-center text-danger py-3">Error al cargar reservas.</td></tr>`;
+    }
+  }
+
+  cargarReservas();
+
+  document.getElementById("btnNuevaReserva").addEventListener("click", () => {
+    form.reset();
+    document.getElementById("idReserva").value = "";
+    document.getElementById("tituloModal").textContent = "Nueva Reserva";
+    modal.show();
+  });
+
+  window.editarReserva = (id, estado, comentarios, subtotal, iva, total, usuarioId, usuarioExternoId, activo) => {
+    document.getElementById("idReserva").value = id;
+    document.getElementById("estadoReserva").value = estado;
+    document.getElementById("comentariosReserva").value = comentarios;
+    document.getElementById("costoSubtotal").value = subtotal;
+    document.getElementById("costoIVA").value = iva;
+    document.getElementById("costoFinal").value = total;
+    document.getElementById("usuarioId").value = usuarioId;
+    document.getElementById("usuarioExternoId").value = usuarioExternoId;
+    document.getElementById("esActivoReserva").checked = activo;
+    document.getElementById("tituloModal").textContent = "Editar Reserva";
+    modal.show();
+  };
+
+  window.eliminarReserva = async (id) => {
+    const confirm = await Swal.fire({
+      title: "¿Eliminar reserva?",
+      text: "Esta acción no se puede deshacer.",
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonText: "Sí, eliminar",
+      cancelButtonText: "Cancelar",
+      confirmButtonColor: "#d33"
+    });
+    if (!confirm.isConfirmed) return;
+
+    const resp = await fetch(`/api/reservas/${id}/`, { method: "DELETE" });
+    const data = await resp.json();
+    Swal.fire(data.mensaje || "Resultado", "", data.eliminado ? "success" : "error");
+    cargarReservas();
+  };
+
+  form.addEventListener("submit", async (e) => {
+    e.preventDefault();
+    const id = document.getElementById("idReserva").value;
+    const payload = {
+      Id: parseInt(id) || 0,
+      UsuarioId: parseInt(document.getElementById("usuarioId").value),
+      UsuarioExternoId: parseInt(document.getElementById("usuarioExternoId").value),
+      Estado: document.getElementById("estadoReserva").value,
+      Comentarios: document.getElementById("comentariosReserva").value,
+      CostoSubtotal: parseFloat(document.getElementById("costoSubtotal").value),
+      CostoIVA: parseFloat(document.getElementById("costoIVA").value),
+      CostoFinal: parseFloat(document.getElementById("costoFinal").value),
+      MinutosRetencion: 15,
+      ExpiraEn: 900,
+      EsBloqueada: false,
+      TokenSesion: "XYZ",
+      FechaRegistro: new Date().toISOString(),
+      UltimaFechaCambio: new Date().toISOString(),
+      EsActivo: document.getElementById("esActivoReserva").checked,
+      UsuarioExterno: {},
+      Usuarios: {}
+    };
+
+    const method = id ? "PUT" : "POST";
+    const url = id ? `/api/reservas/${id}/` : "/api/reservas/";
+
+    const resp = await fetch(url, {
+      method,
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload)
+    });
+
+    const data = await resp.json();
+    Swal.fire(data.mensaje || "Resultado", "", data.resultado || data.actualizado ? "success" : "error");
+    modal.hide();
+    cargarReservas();
+  });
+});
+</script>
+{% endblock %}

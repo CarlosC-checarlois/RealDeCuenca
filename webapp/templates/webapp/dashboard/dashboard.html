@@ -1,0 +1,131 @@
+{% extends 'cabezal.html' %}
+{% load static %}
+
+{% block titulo_pagina %}
+    <title>Panel de Administración | QuitusArte</title>
+{% endblock %}
+
+{% block contenido_pagina %}
+    <!-- CONTEXTO RAPIDO -->
+    <!-- CONTEXTO RAPIDO -->
+    <!-- CONTEXTO RAPIDO -->
+    <section
+            class="contexto-rapido_contenido_rapido_generales d-flex align-items-center justify-content-center text-center text-white">
+        <!-- Imagen de fondo directa -->
+        <img src="{% static '/webapp/imagenes/dashboard/dashboard_imagen.png' %}" alt="Banner Servicios"
+             class="imagen_contenido_rapido_generales">
+
+        <!-- Capa oscura superpuesta -->
+        <div class="overlay_contenido_rapido_generales"></div>
+
+        <!-- Contenido central -->
+        <div class="contenido_contenido_rapido_generales">
+            <h1 class="titulo_contenido_rapido_generales">Dashboard</h1>
+            <p class="breadcrumb_contenido_rapido_generales">
+                <a href="/" class="link-breadcrumb_contenido_rapido_generales">Inicio</a> › Dashboard
+            </p>
+        </div>
+    </section>
+
+    <!-- CONTEXTO RAPIDO -->
+    <!-- CONTEXTO RAPIDO -->
+    <!-- CONTEXTO RAPIDO -->
+    <section class="py-5 bg-light min-vh-100">
+        <div class="container">
+            <div class="text-center mb-5">
+                <h1 class="fw-bold text-dark">Panel de Administración</h1>
+                <p class="text-muted">Gestiona los recursos del sistema desde un solo lugar.</p>
+            </div>
+
+            <!-- GRID DE CRUDS -->
+            <div class="row g-4">
+                <!-- CARD POLITICAS -->
+                <div class="col-12 col-sm-6 col-lg-4">
+                    <div class="card shadow-sm h-100 card-dashboard text-center p-4 border-0">
+                        <div class="card-body">
+                            <i class="fa-solid fa-scale-balanced fa-3x text-warning mb-3"></i>
+                            <h5 class="card-title fw-bold mb-3">CRUD Políticas</h5>
+                            <p class="text-muted mb-4">Gestiona las políticas del sistema.</p>
+                            <a href="/dashboard/politicas" class="btn btn-warning w-100 fw-semibold">
+                                <i class="fa-solid fa-arrow-right me-1"></i> Ir a Políticas
+                            </a>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- CARD USUARIOS -->
+                <div class="col-12 col-sm-6 col-lg-4">
+                    <div class="card shadow-sm h-100 card-dashboard text-center p-4 border-0">
+                        <div class="card-body">
+                            <i class="fa-solid fa-users fa-3x text-primary mb-3"></i>
+                            <h5 class="card-title fw-bold mb-3">CRUD Usuarios</h5>
+                            <p class="text-muted mb-4">Crea, edita y elimina usuarios registrados.</p>
+                            <a href="/dashboard/usuarios" class="btn btn-primary w-100 fw-semibold">
+                                <i class="fa-solid fa-arrow-right me-1"></i> Ir a Usuarios
+                            </a>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- CARD ESPACIOS -->
+                <div class="col-12 col-sm-6 col-lg-4">
+                    <div class="card shadow-sm h-100 card-dashboard text-center p-4 border-0">
+                        <div class="card-body">
+                            <i class="fa-solid fa-landmark fa-3x text-success mb-3"></i>
+                            <h5 class="card-title fw-bold mb-3">CRUD Espacios</h5>
+                            <p class="text-muted mb-4">Administra los espacios culturales disponibles.</p>
+                            <a href="/dashboard/espacios" class="btn btn-success w-100 fw-semibold">
+                                <i class="fa-solid fa-arrow-right me-1"></i> Ir a Espacios
+                            </a>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- CARD RESERVAS -->
+                <div class="col-12 col-sm-6 col-lg-4">
+                    <div class="card shadow-sm h-100 card-dashboard text-center p-4 border-0">
+                        <div class="card-body">
+                            <i class="fa-solid fa-calendar-check fa-3x text-info mb-3"></i>
+                            <h5 class="card-title fw-bold mb-3">CRUD Reservas</h5>
+                            <p class="text-muted mb-4">Consulta, modifica o elimina reservas.</p>
+                            <a href="/dashboard/reservas" class="btn btn-info text-white w-100 fw-semibold">
+                                <i class="fa-solid fa-arrow-right me-1"></i> Ir a Reservas
+                            </a>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- CARD PAGOS -->
+                <div class="col-12 col-sm-6 col-lg-4">
+                    <div class="card shadow-sm h-100 card-dashboard text-center p-4 border-0">
+                        <div class="card-body">
+                            <i class="fa-solid fa-credit-card fa-3x text-danger mb-3"></i>
+                            <h5 class="card-title fw-bold mb-3">CRUD Pagos</h5>
+                            <p class="text-muted mb-4">Gestiona los pagos y transacciones.</p>
+                            <a href="/dashboard/pagos" class="btn btn-danger w-100 fw-semibold">
+                                <i class="fa-solid fa-arrow-right me-1"></i> Ir a Pagos
+                            </a>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </section>
+{% endblock %}
+
+{% block jvscript_archivos_defer %}
+    <script>
+        document.addEventListener("DOMContentLoaded", () => {
+            const sesion = JSON.parse(localStorage.getItem("usuarioSesion") || "{}");
+            if (!sesion.isLoggedIn || (sesion.Rol || "").toLowerCase() !== "administrador") {
+                Swal.fire({
+                    icon: "error",
+                    title: "Acceso restringido",
+                    text: "Solo los administradores pueden acceder al panel.",
+                    confirmButtonColor: "#FFD700"
+                }).then(() => window.location.href = "/");
+            }
+        });
+    </script>
+{% endblock %}

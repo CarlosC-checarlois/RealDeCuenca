@@ -1,0 +1,167 @@
+{% extends 'cabezal.html' %}
+{% load static %}
+
+{% block titulo_pagina %}
+<title>Registro | QuitusArte</title>
+{% endblock %}
+
+{% block contenido_pagina %}
+<!-- ============================== -->
+<!-- 🌄 SECCIÓN HERO / CONTEXTO -->
+<!-- ============================== -->
+<section class="contexto-rapido_contenido_rapido_generales d-flex align-items-center justify-content-center text-center text-white">
+  <img src="{% static 'webapp/imagenes/inicio_sesion/foto_inicio_sesion_5.png' %}" alt="Banner Registro"
+       class="imagen_contenido_rapido_generales">
+  <div class="overlay_contenido_rapido_generales"></div>
+  <div class="contenido_contenido_rapido_generales">
+    <h1 class="titulo_contenido_rapido_generales">Registro</h1>
+    <p class="breadcrumb_contenido_rapido_generales">
+      <a href="/" class="link-breadcrumb_contenido_rapido_generales">Inicio</a> › Registro
+    </p>
+  </div>
+</section>
+
+<!-- ============================== -->
+<!-- 🧾 FORMULARIO DE REGISTRO -->
+<!-- ============================== -->
+<section class="login_index_inicio py-5">
+  <div class="container">
+    <div class="row justify-content-center align-items-center">
+
+      <!-- Imagen lateral -->
+      <div class="col-md-6 d-none d-md-block text-center">
+        <img src="{% static 'webapp/imagenes/inicio_sesion/foto_inicio_sesion_6.png' %}"
+             alt="Registro" class="img-fluid login-img_index_inicio">
+      </div>
+
+      <!-- Formulario -->
+      <div class="col-md-6 col-lg-5">
+        <div class="login-card_index_inicio p-4 p-md-5 shadow-sm">
+          <h2 class="titulo_index_inicio text-center mb-4">Crear cuenta</h2>
+          <p class="texto-auxiliar_index_inicio text-center mb-4">
+            Regístrate para acceder a tus reservas y beneficios culturales.
+          </p>
+
+          <form class="formulario_register">
+            <!-- Nombre -->
+            <div class="mb-3">
+              <label for="nombre_register" class="form-label subtitulo_index_inicio">Nombre completo</label>
+              <input type="text" id="nombre_register" class="form-control input_index_inicio"
+                     placeholder="Ej. Ana López" required>
+            </div>
+
+            <!-- Correo -->
+            <div class="mb-3">
+              <label for="correo_register" class="form-label subtitulo_index_inicio">Correo electrónico</label>
+              <input type="email" id="correo_register" class="form-control input_index_inicio"
+                     placeholder="ejemplo@correo.com" required>
+            </div>
+
+            <!-- Contraseña -->
+            <div class="mb-3">
+              <label for="contrasena_register" class="form-label subtitulo_index_inicio">Contraseña</label>
+              <input type="password" id="contrasena_register" class="form-control input_index_inicio"
+                     placeholder="********" required>
+            </div>
+
+            <!-- Botón -->
+            <div class="d-grid mt-4">
+              <button type="submit" class="btn btn-iniciar_index_inicio">
+                <i class="fa-solid fa-user-plus me-2"></i> Crear cuenta
+              </button>
+            </div>
+          </form>
+
+          <div class="text-center mt-4">
+            <p class="texto-base_index_inicio mb-0">
+              ¿Ya tienes cuenta?
+              <a href="{% url 'login' %}" class="text-warning text-decoration-none">Inicia sesión aquí</a>
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+{% endblock %}
+
+{% block jvscript_archivos_defer %}
+<!-- SweetAlert -->
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+<script>
+document.addEventListener("DOMContentLoaded", () => {
+  const form = document.querySelector(".formulario_register");
+
+  form.addEventListener("submit", async (e) => {
+    e.preventDefault();
+
+    const nombre = document.getElementById("nombre_register").value.trim();
+    const correo = document.getElementById("correo_register").value.trim();
+    const contrasena = document.getElementById("contrasena_register").value.trim();
+
+    if (!nombre || !correo || !contrasena) {
+      Swal.fire("Campos incompletos", "Por favor llena todos los campos.", "warning");
+      return;
+    }
+
+    // Mostrar loader
+    Swal.fire({
+      title: "Creando tu cuenta...",
+      text: "Por favor espera un momento.",
+      allowOutsideClick: false,
+      didOpen: () => Swal.showLoading()
+    });
+
+    try {
+      const response = await fetch("{% url 'api_register' %}", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ nombre, correo, contrasena })
+      });
+
+      const result = await response.json();
+
+      Swal.close();
+
+      if (!result.success) {
+        Swal.fire({
+          icon: "error",
+          title: "Error al registrar",
+          text: result.error || "No se pudo crear el usuario.",
+          confirmButtonColor: "#FFD700"
+        });
+        return;
+      }
+
+      // Guardar sesión local
+      const usuario = result.usuario;
+      const sesion = {
+        isLoggedIn: true,
+        Id: usuario.Id,
+        Nombre: usuario.Nombre,
+        Email: usuario.Email,
+        Rol: usuario.Rol,
+        FechaInicio: new Date().toISOString()
+      };
+      localStorage.setItem("usuarioSesion", JSON.stringify(sesion));
+
+      Swal.fire({
+        icon: "success",
+        title: "Cuenta creada exitosamente 🎉",
+        html: `<p>Bienvenido, <strong>${usuario.Nombre}</strong></p>`,
+        confirmButtonColor: "#FFD700",
+        confirmButtonText: "Ir al inicio"
+      }).then(() => {
+        window.location.href = "/";
+      });
+
+    } catch (error) {
+      console.error("❌ Error en registro:", error);
+      Swal.close();
+      Swal.fire("Error", "No se pudo conectar con el servidor.", "error");
+    }
+  });
+});
+</script>
+{% endblock %}

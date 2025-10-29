@@ -1,0 +1,228 @@
+{% extends 'cabezal.html' %}
+{% load static %}
+
+{% block titulo_pagina %}
+<title>Dashboard | Pagos</title>
+{% endblock %}
+
+{% block contenido_pagina %}
+<section class="contexto-rapido_contenido_rapido_generales d-flex align-items-center justify-content-center text-center text-white">
+    <img src="{% static '/webapp/imagenes/dashboard/dashboard_imagen.png' %}" alt="Banner Dashboard"
+         class="imagen_contenido_rapido_generales">
+    <div class="overlay_contenido_rapido_generales"></div>
+    <div class="contenido_contenido_rapido_generales">
+        <h1 class="titulo_contenido_rapido_generales">Gestión de Pagos</h1>
+        <p class="breadcrumb_contenido_rapido_generales">
+            <a href="/dashboard" class="link-breadcrumb_contenido_rapido_generales">Dashboard</a> › Pagos
+        </p>
+    </div>
+</section>
+
+<section class="py-5 bg-light min-vh-100">
+    <div class="container">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h2 class="fw-bold text-dark mb-0">Pagos Registrados</h2>
+            <button id="btnNuevo" class="btn btn-warning fw-semibold">
+                <i class="fa-solid fa-plus"></i> Nuevo Pago
+            </button>
+        </div>
+
+        <div class="card border-0 shadow-sm">
+            <div class="card-body p-0">
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle mb-0">
+                        <thead class="table-dark">
+                            <tr>
+                                <th>ID</th>
+                                <th>Reserva</th>
+                                <th>Monto</th>
+                                <th>Estado</th>
+                                <th>Fuente</th>
+                                <th>Referencia</th>
+                                <th>Fecha Pago</th>
+                                <th>Activo</th>
+                                <th class="text-center">Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tablaPagos">
+                            <tr><td colspan="9" class="text-center py-4 text-muted">Cargando pagos...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Modal CRUD -->
+<div class="modal fade" id="modalPago" tabindex="-1" aria-labelledby="modalPagoLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-centered">
+        <div class="modal-content border-0 shadow">
+            <div class="modal-header bg-warning">
+                <h5 class="modal-title fw-bold text-dark" id="tituloModal">Nuevo Pago</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+            </div>
+            <div class="modal-body">
+                <form id="formPago">
+                    <input type="hidden" id="Id" name="Id">
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <label class="form-label">Reserva ID</label>
+                            <input type="number" class="form-control" id="ReservaId" name="ReservaId" required>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Monto (USD)</label>
+                            <input type="number" step="0.01" class="form-control" id="Monto" name="Monto" required>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Cédula</label>
+                            <input type="text" class="form-control" id="NumeroDeCedula" name="NumeroDeCedula">
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Estado</label>
+                            <select class="form-select" id="Estado" name="Estado">
+                                <option value="Pagado">Pagado</option>
+                                <option value="Pendiente">Pendiente</option>
+                                <option value="Cancelado">Cancelado</option>
+                            </select>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Fuente</label>
+                            <select class="form-select" id="Fuente" name="Fuente">
+                                <option value="TarjetaCredito">Tarjeta de Crédito</option>
+                                <option value="Transferencia">Transferencia</option>
+                                <option value="Efectivo">Efectivo</option>
+                            </select>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Referencia Transacción</label>
+                            <input type="text" class="form-control" id="TransaccionReferencia" name="TransaccionReferencia">
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Fecha de Pago</label>
+                            <input type="datetime-local" class="form-control" id="FechaPago" name="FechaPago">
+                        </div>
+                        <div class="col-md-12">
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" id="EsActivo" name="EsActivo" checked>
+                                <label class="form-check-label" for="EsActivo">Activo</label>
+                            </div>
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                <button id="btnGuardar" class="btn btn-warning fw-semibold">Guardar</button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block jvscript_archivos_defer %}
+<script>
+document.addEventListener("DOMContentLoaded", () => {
+    const tabla = document.getElementById("tablaPagos");
+    const modal = new bootstrap.Modal(document.getElementById("modalPago"));
+    const form = document.getElementById("formPago");
+    const btnNuevo = document.getElementById("btnNuevo");
+    const btnGuardar = document.getElementById("btnGuardar");
+    const tituloModal = document.getElementById("tituloModal");
+
+    async function cargarPagos() {
+        tabla.innerHTML = `<tr><td colspan="9" class="text-center py-4 text-muted">Cargando...</td></tr>`;
+        try {
+            const res = await fetch("/api/pagos/");
+            const data = await res.json();
+            if (!data.exito) throw new Error(data.mensaje);
+            if (!data.pagos.length) {
+                tabla.innerHTML = `<tr><td colspan="9" class="text-center py-4 text-muted">No hay pagos registrados.</td></tr>`;
+                return;
+            }
+            tabla.innerHTML = data.pagos.map(p => `
+                <tr>
+                    <td>${p.Id}</td>
+                    <td>${p.ReservaId}</td>
+                    <td>$${p.Monto.toFixed(2)}</td>
+                    <td>${p.Estado}</td>
+                    <td>${p.Fuente}</td>
+                    <td>${p.TransaccionReferencia}</td>
+                    <td>${p.FechaPago || ''}</td>
+                    <td><span class="badge ${p.EsActivo ? 'bg-success' : 'bg-secondary'}">${p.EsActivo ? 'Sí' : 'No'}</span></td>
+                    <td class="text-center">
+                        <button class="btn btn-sm btn-primary me-2" onclick='editarPago(${JSON.stringify(p)})'><i class="fa-solid fa-pen"></i></button>
+                        <button class="btn btn-sm btn-danger" onclick="eliminarPago(${p.Id})"><i class="fa-solid fa-trash"></i></button>
+                    </td>
+                </tr>
+            `).join("");
+        } catch (err) {
+            tabla.innerHTML = `<tr><td colspan="9" class="text-center text-danger">${err.message}</td></tr>`;
+        }
+    }
+
+    btnNuevo.addEventListener("click", () => {
+        form.reset();
+        document.getElementById("Id").value = "";
+        tituloModal.textContent = "Nuevo Pago";
+        modal.show();
+    });
+
+    btnGuardar.addEventListener("click", async () => {
+        const datos = Object.fromEntries(new FormData(form).entries());
+        datos.EsActivo = document.getElementById("EsActivo").checked;
+
+        const url = datos.Id ? `/api/pagos/${datos.Id}/` : "/api/pagos/";
+        const metodo = datos.Id ? "PUT" : "POST";
+
+        try {
+            const res = await fetch(url, {
+                method: metodo,
+                headers: {"Content-Type": "application/json"},
+                body: JSON.stringify(datos)
+            });
+            const data = await res.json();
+            if (!data.exito) throw new Error(data.mensaje);
+            Swal.fire({icon: "success", title: "Éxito", text: data.mensaje, confirmButtonColor: "#ffc107"});
+            modal.hide();
+            cargarPagos();
+        } catch (err) {
+            Swal.fire({icon: "error", title: "Error", text: err.message, confirmButtonColor: "#dc3545"});
+        }
+    });
+
+    window.editarPago = (p) => {
+        for (const key in p) {
+            if (form.elements[key]) form.elements[key].value = p[key];
+        }
+        document.getElementById("EsActivo").checked = p.EsActivo;
+        tituloModal.textContent = `Editar Pago (#${p.Id})`;
+        modal.show();
+    };
+
+    window.eliminarPago = async (id) => {
+        const conf = await Swal.fire({
+            title: "¿Eliminar pago?",
+            text: "Esta acción no se puede deshacer.",
+            icon: "warning",
+            showCancelButton: true,
+            confirmButtonText: "Eliminar",
+            cancelButtonText: "Cancelar",
+            confirmButtonColor: "#dc3545"
+        });
+        if (!conf.isConfirmed) return;
+        try {
+            const res = await fetch(`/api/pagos/${id}/`, {method: "DELETE"});
+            const data = await res.json();
+            if (!data.exito) throw new Error(data.mensaje);
+            Swal.fire({icon: "success", title: "Eliminado", text: data.mensaje, confirmButtonColor: "#28a745"});
+            cargarPagos();
+        } catch (err) {
+            Swal.fire({icon: "error", title: "Error", text: err.message, confirmButtonColor: "#dc3545"});
+        }
+    };
+
+    cargarPagos();
+});
+</script>
+{% endblock %}

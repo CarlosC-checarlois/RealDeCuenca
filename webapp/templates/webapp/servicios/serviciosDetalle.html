@@ -1,0 +1,363 @@
+{% extends "cabezal.html" %}
+{% load static %}
+
+{% block titulo_pagina %}
+<title>Detalle de Servicio | RealDeCuenca</title>
+{% endblock %}
+
+{% block css_archivos %}
+<link rel="stylesheet" href="{% static 'webapp/css/servicios_detalle/index_servicios_detalle.css' %}">
+{% endblock %}
+
+{% block contenido_pagina %}
+<!-- ========================================================== -->
+<!-- SECCIÓN DE ENCABEZADO -->
+<!-- ========================================================== -->
+<section class="contexto-rapido_contenido_rapido_generales d-flex align-items-center justify-content-center text-center text-white">
+    <img src="{% static 'webapp/imagenes/generales/Foto_Artistica.png' %}" alt="Banner Servicios" class="imagen_contenido_rapido_generales">
+    <div class="overlay_contenido_rapido_generales"></div>
+    <div class="contenido_contenido_rapido_generales">
+        <h1 class="titulo_contenido_rapido_generales">Servicios Detalle</h1>
+        <p class="breadcrumb_contenido_rapido_generales">
+            <a href="{% url 'home' %}" class="link-breadcrumb_contenido_rapido_generales">Inicio</a> /
+            <a href="{% url 'servicios' %}" class="link-breadcrumb_contenido_rapido_generales">Servicios</a> / Detalle
+        </p>
+    </div>
+</section>
+
+<!-- ========================================================== -->
+<!-- SECCIÓN PRINCIPAL DE DETALLE -->
+<!-- ========================================================== -->
+<section class="detalle_index_servicios py-5">
+    <div class="container">
+
+        <!-- TÍTULO PRINCIPAL -->
+        <div class="text-center mb-5">
+            <h2 class="titulo-detalle_index_servicios">{{ espacio.Nombre }}</h2>
+            <p class="subtitulo-detalle_index_servicios text-muted">{{ espacio.DescripcionDelLugar }}</p>
+        </div>
+
+        <div class="row align-items-start gy-4">
+            <!-- GALERÍA -->
+            <div class="col-md-6">
+                <div class="galeria_index_servicios">
+                    <img src="{{ espacio.ImagenPrincipal }}" class="img-principal_index_servicios rounded" alt="{{ espacio.Nombre }}">
+                    {% if espacio.Imagenes and espacio.Imagenes|length > 1 %}
+                    <div class="miniaturas_index_servicios d-flex justify-content-center gap-3 mt-3">
+                        {% for img in espacio.Imagenes|slice:"1:" %}
+                        <img src="{{ img }}" alt="Imagen del espacio" class="rounded" style="width:80px;height:80px;object-fit:cover;">
+                        {% endfor %}
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- INFORMACIÓN -->
+            <div class="col-md-6">
+                <div class="info_index_servicios">
+                    <h4 class="mb-3 text-warning">Detalles del hospedaje</h4>
+                    <p><strong>Hotel:</strong> {{ espacio.NombreHotel }}</p>
+                    <p><strong>Tipo de servicio:</strong> {{ espacio.NombreTipoServicio }}</p>
+                    <p><strong>Tipo de alimentación:</strong> {{ espacio.NombreTipoAlimentacion }}</p>
+                    <p><strong>Ubicación:</strong> {{ espacio.Ubicacion }}</p>
+                    <p><strong>Capacidad:</strong> {{ espacio.Capacidad }}</p>
+                    <p><strong>Puntuación:</strong> {{ espacio.Puntuacion }}/10</p>
+                    <p>
+                        <strong>Costo diario:</strong>
+                        <span class="text-success fw-bold">${{ espacio.CostoDiario|floatformat:2 }}</span>
+                    </p>
+
+                    <button class="btn btn-warning mt-3"
+                            id="btnAbrirModalReserva"
+                            data-espacioid="{{ espacio.Id }}"
+                            data-nombre="{{ espacio.Nombre }}"
+                            data-ubicacion="{{ espacio.Ubicacion }}"
+                            data-costodiario="{{ espacio.CostoDiario }}"
+                            data-imagenurl="{{ espacio.ImagenPrincipal }}">
+                        <i class="fa-solid fa-calendar-plus me-1"></i> Reservar ahora
+                    </button>
+
+                    {% if espacio.Amenidades %}
+                    <h5 class="text-warning mt-4">Amenidades</h5>
+                    <div class="d-flex flex-wrap gap-2 mb-4">
+                        {% for a in espacio.Amenidades %}
+                        <span class="badge bg-success text-white"><i class="fas fa-check-circle me-1"></i>{{ a }}</span>
+                        {% endfor %}
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <!-- POLÍTICAS Y RECOMENDADOS -->
+        <div class="row mt-5 gy-4">
+            <div class="col-md-6">
+                <div class="politicas-contenedor_index_servicios p-4 rounded shadow-sm border h-100">
+                    <h5 class="text-warning mb-3">Políticas del espacio</h5>
+                    {% if espacio.Politicas %}
+                    <ul class="lista-politicas_index_servicios mb-4 list-unstyled">
+                        {% for p in espacio.Politicas %}
+                        <li class="mb-3 d-flex align-items-center">
+                            <i class="fas fa-gavel text-warning me-2"></i>{{ p }}
+                        </li>
+                        {% endfor %}
+                    </ul>
+                    {% else %}
+                    <p class="text-muted">No hay políticas registradas para este hospedaje.</p>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- RECOMENDADOS -->
+            <div class="col-md-6">
+                <div id="carouselRecomendaciones" class="carousel slide" data-bs-ride="carousel">
+                    <div class="carousel-inner">
+                        {% if recomendados %}
+                        {% for rec in recomendados %}
+                        <div class="carousel-item {% if forloop.first %}active{% endif %}">
+                            <div class="recomendacion_index_servicios p-3 rounded shadow-sm bg-white border d-flex gap-3 align-items-start">
+                                <div class="recomendacion-imagen flex-shrink-0">
+                                    <img src="{{ rec.ImagenPrincipal }}" alt="{{ rec.Nombre }}" class="rounded" style="width:100px;height:100px;object-fit:cover;">
+
+                                </div>
+                                <div class="recomendacion-detalles">
+                                    <h6 class="text-warning mb-1">{{ rec.Nombre }}</h6>
+                                    <p class="mb-1"><strong>Hotel:</strong> {{ rec.NombreHotel }}</p>
+                                    <p class="mb-1"><strong>Ubicación:</strong> {{ rec.Ubicacion }}</p>
+                                    <p class="mb-1"><strong>Costo:</strong> <span class="text-success fw-bold">${{ rec.CostoDiario|floatformat:2 }}</span></p>
+                                    <a href="{% url 'servicios_detalle' rec.Id %}" class="btn btn-outline-secondary btn-sm mt-3">Ver alojamiento</a>
+                                </div>
+                            </div>
+                        </div>
+                        {% endfor %}
+                        {% else %}
+                        <div class="carousel-item active">
+                            <div class="p-3 bg-light rounded text-center text-muted">
+                                No hay hospedajes recomendados para mostrar.
+                            </div>
+                        </div>
+                        {% endif %}
+                    </div>
+
+                    <!-- Controles -->
+                    <button class="carousel-control-prev" type="button" data-bs-target="#carouselRecomendaciones" data-bs-slide="prev">
+                        <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+                    </button>
+                    <button class="carousel-control-next" type="button" data-bs-target="#carouselRecomendaciones" data-bs-slide="next">
+                        <span class="carousel-control-next-icon" aria-hidden="true"></span>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL DE RESERVA -->
+    <div class="modal fade" id="modalReserva_index_servicios" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered modal-md">
+            <div class="modal-content modal-reserva-tabla_index_servicios">
+                <div class="modal-header bg-dark text-white">
+                    <h5 class="modal-title fw-semibold">Confirmar reserva</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+
+                <div class="modal-body px-4 py-4">
+                    <p><strong>Espacio:</strong> <span id="modalNombreEspacio"></span></p>
+                    <p><strong>Ubicación:</strong> <span id="modalUbicacion"></span></p>
+                    <div class="mb-3">
+                        <label>Fecha de inicio</label>
+                        <input type="date" id="fechaInicioReserva" class="form-control" />
+                    </div>
+                    <div class="mb-3">
+                        <label>Fecha de fin</label>
+                        <input type="date" id="fechaFinReserva" class="form-control" />
+                    </div>
+                    <div id="alertaDisponibilidad" class="alert d-none"></div>
+                </div>
+
+                <div class="modal-footer bg-light border-0 d-flex justify-content-between">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="button" class="btn btn-warning" id="btnConfirmarReserva">
+                        <i class="fa-solid fa-calendar-check me-1"></i> Confirmar reserva
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}
+
+{% block jvscript_archivos_defer %}
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script src="{% static 'webapp/js/servicios_detalle/index_servicio_detalle.js' %}"></script>
+<script>
+document.addEventListener("DOMContentLoaded", () => {
+    const btnReservar = document.getElementById("btnAbrirModalReserva");
+    const modalEl = document.getElementById("modalReserva_index_servicios");
+    const modal = new bootstrap.Modal(modalEl);
+
+    const spanNombre = modalEl.querySelector("#modalNombreEspacio");
+    const spanUbicacion = modalEl.querySelector("#modalUbicacion");
+    const inputInicio = modalEl.querySelector("#fechaInicioReserva");
+    const inputFin = modalEl.querySelector("#fechaFinReserva");
+    const alerta = modalEl.querySelector("#alertaDisponibilidad");
+    const btnConfirmar = modalEl.querySelector("#btnConfirmarReserva");
+
+    let espacioIdActual = null;
+
+    // ==========================================================
+    // 🚪 Abrir modal
+    // ==========================================================
+    btnReservar.addEventListener("click", () => {
+        espacioIdActual = btnReservar.dataset.espacioid;
+        const nombre = btnReservar.dataset.nombre;
+        const ubicacion = btnReservar.dataset.ubicacion;
+        const costoDiario = parseFloat(btnReservar.dataset.costodiario || 0);
+
+        spanNombre.textContent = nombre;
+        spanUbicacion.textContent = ubicacion;
+        modalEl.dataset.costodiario = costoDiario;
+
+        alerta.classList.add("d-none");
+        inputInicio.value = "";
+        inputFin.value = "";
+
+        modal.show();
+    });
+
+    // ==========================================================
+    // ✅ Verificar disponibilidad antes de confirmar
+    // ==========================================================
+    btnConfirmar.addEventListener("click", async () => {
+        const fechaInicio = inputInicio.value;
+        const fechaFin = inputFin.value;
+
+        if (!fechaInicio || !fechaFin) {
+            mostrarAlerta("Por favor selecciona ambas fechas.", false);
+            return;
+        }
+
+        const isoInicio = fechaInicio + "T00:00:00";
+        const isoFin = fechaFin + "T00:00:00";
+
+        try {
+            const response = await fetch(`/servicios/verificar-disponibilidad/?espacioId=${espacioIdActual}&fechaInicio=${isoInicio}&fechaFin=${isoFin}`);
+            const data = await response.json();
+
+            if (!data.success) {
+                mostrarAlerta(data.error || "Error al consultar disponibilidad.", false);
+                return;
+            }
+
+            if (!data.disponible) {
+                mostrarAlerta("❌ El espacio no está disponible para esas fechas.", false);
+                return;
+            }
+
+            // ✅ Disponible — Calcular total
+            const dias = calcularDias(fechaInicio, fechaFin);
+            const total = dias * parseFloat(modalEl.dataset.costodiario || 0);
+
+            mostrarAlerta(`✅ Espacio disponible. <br>Días: ${dias}<br>Total: $${total.toFixed(2)}`, true);
+
+            // ==========================================================
+            // 🧩 Guardar en el carrito de reservas (LocalStorage)
+            // ==========================================================
+            try {
+                // Obtener token de sesión persistente
+                const TOKEN_KEY = "tokenSesion";
+                let tokenSesion = localStorage.getItem(TOKEN_KEY);
+                if (!tokenSesion) {
+                    // Si no existe, generar uno nuevo
+                    tokenSesion = self.crypto?.randomUUID?.() || Math.random().toString(36).substring(2);
+                    localStorage.setItem(TOKEN_KEY, tokenSesion);
+                }
+
+                // Crear objeto de reserva
+                const nuevaReserva = {
+                    EspacioId: parseInt(espacioIdActual),
+                    FechaInicio: isoInicio,
+                    FechaFinal: isoFin
+                };
+
+                // Usar CarritoManager si existe (modular)
+                if (typeof CarritoManager !== "undefined") {
+                    CarritoManager.agregar(
+                        parseInt(espacioIdActual),
+                        isoInicio,
+                        isoFin,
+                        btnReservar.dataset.imagenurl || null
+                    );
+                } else {
+                    // 🔄 Fallback por si no se cargó carrito_manager.js
+                    let carrito = JSON.parse(localStorage.getItem("carritoReservas") || "{}");
+                    if (!carrito.ListaEspacios) {
+                        carrito = {
+                            UsuarioId: null,
+                            UsuarioExternoId: null,
+                            TokenCarrito: self.crypto?.randomUUID?.() || Math.random().toString(36).substring(2),
+                            TokenSesionActual: tokenSesion,
+                            FechaInicio: null,
+                            FechaFinal: null,
+                            ListaEspacios: [],
+                            Comentarios: null
+                        };
+                    }
+                    carrito.ListaEspacios.push(nuevaReserva);
+                    localStorage.setItem("carritoReservas", JSON.stringify(carrito));
+                    window.CarritoReservas = carrito;
+                }
+
+                console.log("🛒 Reserva agregada al carrito:", nuevaReserva);
+                console.log("🔑 Token de sesión usado:", tokenSesion);
+
+            } catch (err) {
+                console.error("Error al guardar reserva en carrito:", err);
+            }
+
+            // ==========================================================
+            // 💬 Mostrar confirmación visual
+            // ==========================================================
+            setTimeout(() => {
+                modal.hide();
+                Swal.fire({
+                    title: "✅ ¡Reserva agregada al carrito!",
+                    html: `
+                        <p>Tu reserva de <strong>${spanNombre.textContent}</strong> fue añadida correctamente.</p>
+                        <p><i class="fa-solid fa-location-dot text-warning me-1"></i>${spanUbicacion.textContent}</p>
+                        <p><strong>Total:</strong> $${total.toFixed(2)}</p>
+                    `,
+                    icon: "success",
+                    confirmButtonColor: "#FFD700",
+                    confirmButtonText: "Ir al carrito"
+                }).then(result => {
+                    if (result.isConfirmed) {
+                        window.location.href = "/carrito/";
+                    }
+                });
+            }, 1200);
+
+        } catch (error) {
+            mostrarAlerta("Error de conexión con el servidor.", false);
+        }
+    });
+
+    // ==========================================================
+    // ⚙️ Funciones auxiliares
+    // ==========================================================
+    function mostrarAlerta(mensaje, exito) {
+        alerta.classList.remove("d-none", "alert-success", "alert-danger");
+        alerta.classList.add(exito ? "alert-success" : "alert-danger");
+        alerta.innerHTML = mensaje;
+    }
+
+    function calcularDias(inicio, fin) {
+        const d1 = new Date(inicio);
+        const d2 = new Date(fin);
+        const diff = d2 - d1;
+        return Math.max(1, Math.ceil(diff / (1000 * 60 * 60 * 24)));
+    }
+});
+</script>
+
+
+{% endblock %}

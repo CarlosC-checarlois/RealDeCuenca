@@ -1,0 +1,217 @@
+{% extends 'cabezal.html' %}
+{% load static %}
+
+{% block titulo_pagina %}
+<title>Dashboard | Gestión de Espacios</title>
+{% endblock %}
+
+{% block contenido_pagina %}
+<section class="contexto-rapido_contenido_rapido_generales d-flex align-items-center justify-content-center text-center text-white">
+    <img src="{% static '/webapp/imagenes/dashboard/dashboard_imagen.png' %}" alt="Banner Dashboard"
+         class="imagen_contenido_rapido_generales">
+    <div class="overlay_contenido_rapido_generales"></div>
+    <div class="contenido_contenido_rapido_generales">
+        <h1 class="titulo_contenido_rapido_generales">Gestión de Espacios</h1>
+        <p class="breadcrumb_contenido_rapido_generales">
+            <a href="/dashboard" class="link-breadcrumb_contenido_rapido_generales">Dashboard</a> › Espacios
+        </p>
+    </div>
+</section>
+
+<section class="py-5 bg-light min-vh-100">
+    <div class="container">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h2 class="fw-bold text-dark mb-0">Espacios Activos</h2>
+            <button id="btnNuevo" class="btn btn-warning fw-semibold">
+                <i class="fa-solid fa-plus"></i> Nuevo Espacio
+            </button>
+        </div>
+
+        <div class="card border-0 shadow-sm">
+            <div class="card-body p-0">
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle mb-0">
+                        <thead class="table-dark">
+                            <tr>
+                                <th>ID</th>
+                                <th>Nombre</th>
+                                <th>Descripción</th>
+                                <th>Costo Diario</th>
+                                <th>Capacidad</th>
+                                <th>Ubicación</th>
+                                <th>Activo</th>
+                                <th class="text-center">Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tablaEspacios">
+                            <tr><td colspan="8" class="text-center py-4 text-muted">Cargando espacios...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Modal CRUD -->
+<div class="modal fade" id="modalEspacio" tabindex="-1" aria-labelledby="modalEspacioLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-centered">
+        <div class="modal-content border-0 shadow">
+            <div class="modal-header bg-warning">
+                <h5 class="modal-title fw-bold text-dark" id="tituloModal">Nuevo Espacio</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+            </div>
+            <div class="modal-body">
+                <form id="formEspacio">
+                    <input type="hidden" id="Id" name="Id">
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <label class="form-label">Nombre</label>
+                            <input type="text" class="form-control" id="Nombre" name="Nombre" required>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Costo Diario (USD)</label>
+                            <input type="number" step="0.01" class="form-control" id="CostoDiario" name="CostoDiario" required>
+                        </div>
+                        <div class="col-md-12">
+                            <label class="form-label">Descripción</label>
+                            <textarea class="form-control" id="DescripcionDelLugar" name="DescripcionDelLugar" rows="2"></textarea>
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label">Capacidad Adultos</label>
+                            <input type="number" class="form-control" id="CapacidadAdultos" name="CapacidadAdultos" min="0">
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label">Capacidad Niños</label>
+                            <input type="number" class="form-control" id="CapacidadNinios" name="CapacidadNinios" min="0">
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label">Ubicación</label>
+                            <input type="text" class="form-control" id="Ubicacion" name="Ubicacion">
+                        </div>
+                        <div class="col-md-12">
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" id="EsActivo" name="EsActivo" checked>
+                                <label class="form-check-label" for="EsActivo">Activo</label>
+                            </div>
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                <button id="btnGuardar" class="btn btn-warning fw-semibold">Guardar</button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block jvscript_archivos_defer %}
+<script>
+document.addEventListener("DOMContentLoaded", () => {
+    const tabla = document.getElementById("tablaEspacios");
+    const modal = new bootstrap.Modal(document.getElementById("modalEspacio"));
+    const form = document.getElementById("formEspacio");
+    const btnNuevo = document.getElementById("btnNuevo");
+    const btnGuardar = document.getElementById("btnGuardar");
+    const tituloModal = document.getElementById("tituloModal");
+
+    async function cargarEspacios() {
+        tabla.innerHTML = `<tr><td colspan="8" class="text-center py-4 text-muted">Cargando...</td></tr>`;
+        try {
+            const res = await fetch("/api/espacios/");
+            const data = await res.json();
+            if (!data.exito) throw new Error(data.mensaje);
+            if (data.espacios.length === 0) {
+                tabla.innerHTML = `<tr><td colspan="8" class="text-center py-4 text-muted">No hay espacios registrados.</td></tr>`;
+                return;
+            }
+            tabla.innerHTML = data.espacios.map(e => `
+                <tr>
+                    <td>${e.Id}</td>
+                    <td>${e.Nombre}</td>
+                    <td>${e.DescripcionDelLugar}</td>
+                    <td>$${parseFloat(e.CostoDiario).toFixed(2)}</td>
+                    <td>${e.CapacidadAdultos} adultos / ${e.CapacidadNinios} niños</td>
+                    <td>${e.Ubicacion}</td>
+                    <td><span class="badge ${e.EsActivo ? 'bg-success' : 'bg-secondary'}">${e.EsActivo ? 'Sí' : 'No'}</span></td>
+                    <td class="text-center">
+                        <button class="btn btn-sm btn-primary me-2" onclick='editarEspacio(${JSON.stringify(e)})'><i class="fa-solid fa-pen"></i></button>
+                        <button class="btn btn-sm btn-danger" onclick="eliminarEspacio(${e.Id})"><i class="fa-solid fa-trash"></i></button>
+                    </td>
+                </tr>
+            `).join("");
+        } catch (err) {
+            console.error(err);
+            tabla.innerHTML = `<tr><td colspan="8" class="text-center text-danger py-4">Error al cargar espacios.</td></tr>`;
+        }
+    }
+
+    btnNuevo.addEventListener("click", () => {
+        form.reset();
+        document.getElementById("Id").value = "";
+        tituloModal.textContent = "Nuevo Espacio";
+        modal.show();
+    });
+
+    btnGuardar.addEventListener("click", async () => {
+        const datos = Object.fromEntries(new FormData(form).entries());
+        datos.EsActivo = document.getElementById("EsActivo").checked;
+
+        const url = datos.Id ? `/api/espacios/${datos.Id}/` : "/api/espacios/";
+        const metodo = datos.Id ? "PUT" : "POST";
+
+        try {
+            const res = await fetch(url, {
+                method: metodo,
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(datos)
+            });
+            const data = await res.json();
+
+            if (!data.exito) throw new Error(data.mensaje);
+
+            Swal.fire({ icon: "success", title: "Éxito", text: data.mensaje, confirmButtonColor: "#ffc107" });
+            modal.hide();
+            cargarEspacios();
+        } catch (err) {
+            Swal.fire({ icon: "error", title: "Error", text: err.message, confirmButtonColor: "#dc3545" });
+        }
+    });
+
+    window.editarEspacio = (e) => {
+        for (const key in e) {
+            if (form.elements[key]) form.elements[key].value = e[key];
+        }
+        document.getElementById("EsActivo").checked = e.EsActivo;
+        tituloModal.textContent = `Editar Espacio (#${e.Id})`;
+        modal.show();
+    };
+
+    window.eliminarEspacio = async (id) => {
+        const conf = await Swal.fire({
+            title: "¿Eliminar espacio?",
+            text: "Esta acción no se puede deshacer.",
+            icon: "warning",
+            showCancelButton: true,
+            confirmButtonText: "Eliminar",
+            cancelButtonText: "Cancelar",
+            confirmButtonColor: "#dc3545"
+        });
+        if (!conf.isConfirmed) return;
+        try {
+            const res = await fetch(`/api/espacios/${id}/`, { method: "DELETE" });
+            const data = await res.json();
+            if (!data.exito) throw new Error(data.mensaje);
+            Swal.fire({ icon: "success", title: "Eliminado", text: data.mensaje, confirmButtonColor: "#28a745" });
+            cargarEspacios();
+        } catch (err) {
+            Swal.fire({ icon: "error", title: "Error", text: err.message, confirmButtonColor: "#dc3545" });
+        }
+    };
+
+    cargarEspacios();
+});
+</script>
+{% endblock %}

@@ -1,0 +1,429 @@
+{% extends 'cabezal.html' %}
+{% load static %}
+
+{% block titulo_pagina %}
+    <title>Mis Reservas | QuitusArte</title>
+{% endblock %}
+
+{% block css_archivos %}
+    <link rel="stylesheet" href="{% static 'webapp/css/reservas/index_reservas.css' %}"/>
+
+{% endblock %}
+
+{% block contenido_pagina %}
+    <!-- CONTEXTO RAPIDO -->
+    <!-- CONTEXTO RAPIDO -->
+    <!-- CONTEXTO RAPIDO -->
+    <section
+            class="contexto-rapido_contenido_rapido_generales d-flex align-items-center justify-content-center text-center text-white">
+        <!-- Imagen de fondo directa -->
+        <img src="{% static '/webapp/imagenes/carrito/carrito_imagen_1.png' %}" alt="Banner Servicios"
+             class="imagen_contenido_rapido_generales">
+
+        <!-- Capa oscura superpuesta -->
+        <div class="overlay_contenido_rapido_generales"></div>
+
+        <!-- Contenido central -->
+        <div class="contenido_contenido_rapido_generales">
+            <h1 class="titulo_contenido_rapido_generales">Reservas</h1>
+            <p class="breadcrumb_contenido_rapido_generales">
+                <a href="#" class="link-breadcrumb_contenido_rapido_generales">Inicio</a> › Reservas
+            </p>
+        </div>
+    </section>
+
+    <!-- CONTEXTO RAPIDO -->
+    <!-- CONTEXTO RAPIDO -->
+    <!-- CONTEXTO RAPIDO -->
+
+    <section class="container py-5 mt-5 reservas_index_reservas">
+
+        <!-- ENCABEZADO -->
+        <div class="text-center mb-5">
+            <h1 class="titulo_index_reservas">
+                <i class="fa-solid fa-calendar-days me-2"></i> Mis Reservas
+            </h1>
+            <p class="subtitulo_index_reservas">Consulta tus reservas confirmadas y pendientes.</p>
+            <hr class="mx-auto opacity-25" style="width: 200px;">
+        </div>
+
+        <!-- ===================== RESERVAS CONFIRMADAS ===================== -->
+        <div id="wrapConfirmadas" class="mb-5">
+            <h3 class="text-warning fw-semibold mb-4">
+                <i class="fa-solid fa-circle-check me-2"></i> Reservas Confirmadas
+            </h3>
+
+            <div id="reservasConfirmadas" class="row g-4"></div>
+
+            <div id="sinReservasConfirmadas" class="reservas-vacias_index_reservas d-none">
+                <i class="fa-solid fa-bed"></i>
+                <p>No tienes reservas confirmadas aún.</p>
+                <a href="{% url 'servicios' %}" class="btn btn-outline-warning px-4">
+                    <i class="fa-solid fa-magnifying-glass me-1"></i> Explorar Espacios
+                </a>
+            </div>
+        </div>
+
+        <!-- ===================== RESERVAS PENDIENTES (CARRITO) ===================== -->
+        <div id="wrapCarrito" class="mt-5">
+            <h3 class="text-warning fw-semibold mb-4">
+                <i class="fa-solid fa-clock me-2"></i> Reservas Pendientes (Carrito)
+            </h3>
+
+            <div id="contenedorCarrito"></div>
+
+            <div id="resumenTotal" class="resumen_index_reservas mt-4 d-none">
+                <div class="d-flex justify-content-between align-items-center flex-wrap">
+                    <div>
+                        <p class="mb-1"><strong>Subtotal:</strong> <span id="subtotalValor">$0.00</span></p>
+                        <p class="mb-0"><strong>IVA (15%):</strong> <span id="ivaValor">$0.00</span></p>
+                    </div>
+                    <div class="text-end texto-total_index_reservas">
+                        Total: <span id="totalGeneral">$0.00</span>
+                    </div>
+                </div>
+
+                <div class="text-end mt-3">
+                    <button id="btnConfirmarReservas" class="btn-confirmar_index_reservas">
+                        <i class="fa-solid fa-calendar-check me-2"></i> Confirmar Reservas
+                    </button>
+                </div>
+            </div>
+
+            <div id="mensajeVacio" class="reservas-vacias_index_reservas d-none">
+                <p>No tienes reservas pendientes en el carrito.</p>
+            </div>
+        </div>
+    </section>
+
+{% endblock %}
+
+{% block jvscript_archivos_defer %}
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", async () => {
+            const sesion = JSON.parse(localStorage.getItem("usuarioSesion") || "{}");
+            const usuarioId = sesion.Id;
+
+            // --- Verificar login ---
+            if (!sesion.isLoggedIn || !usuarioId) {
+                Swal.fire({
+                    title: "Sesión requerida",
+                    text: "Por favor inicia sesión para ver tus reservas.",
+                    icon: "warning",
+                    confirmButtonText: "Ir al inicio de sesión",
+                    confirmButtonColor: "#FFD700"
+                }).then(() => (window.location.href = "/login/"));
+                return;
+            }
+
+            // --- Referencias DOM ---
+            const reservasConfirmadas = document.getElementById("reservasConfirmadas");
+            const sinConfirmadas = document.getElementById("sinReservasConfirmadas");
+            const contCarrito = document.getElementById("contenedorCarrito");
+            const msgVacio = document.getElementById("mensajeVacio");
+            const resumen = document.getElementById("resumenTotal");
+            const subtotalLbl = document.getElementById("subtotalValor");
+            const ivaLbl = document.getElementById("ivaValor");
+            const totalLbl = document.getElementById("totalGeneral");
+            const btnConfirmar = document.getElementById("btnConfirmarReservas");
+            const IVA_PORC = 0.15;
+
+            // ==================== CARGAR RESERVAS CONFIRMADAS ====================
+            async function cargarConfirmadas() {
+                try {
+                    const res = await fetch(`/api/reservas/${usuarioId}/`);
+                    const data = await res.json();
+                    reservasConfirmadas.innerHTML = "";
+
+                    if (!data.reservas || data.reservas.length === 0) {
+                        sinConfirmadas.classList.remove("d-none");
+                        return;
+                    }
+
+                    sinConfirmadas.classList.add("d-none");
+
+                    data.reservas.forEach(r => {
+                        reservasConfirmadas.insertAdjacentHTML(
+                            "beforeend",
+                            `
+          <div class="col-md-6 col-lg-4">
+            <div class="card card-reserva p-3 shadow-sm border-light">
+              <div class="d-flex justify-content-between align-items-center mb-2">
+                <h5 class="fw-semibold text-dark mb-0">Reserva #${r.Id}</h5>
+                ${r.Estado === "PRE-RESERVA"
+                                ? `<span class="badge bg-warning text-dark">PRE-RESERVA</span>`
+                                : `<span class="badge bg-success">CONFIRMADA</span>`}
+
+              </div>
+              <p class="mb-1"><strong>Subtotal:</strong> $${r.CostoSubtotal?.toFixed(2) || "0.00"}</p>
+              <p class="mb-1"><strong>IVA:</strong> $${r.CostoIVA?.toFixed(2) || "0.00"}</p>
+              <p class="mb-1"><strong>Total:</strong> <span class="text-success fw-bold">$${r.CostoFinal?.toFixed(2) || "0.00"}</span></p>
+              <p class="small text-muted mb-2"><strong>Fecha registro:</strong> ${r.FechaRegistro || "N/A"}</p>
+              <div class="text-end mt-2">
+                <button class="btn btn-outline-warning btn-sm ver-detalles-btn" data-id="${r.Id}">
+                  <i class="fa-solid fa-eye"></i> Ver detalles
+                </button>
+                ${r.Estado === "PRE-RESERVA" ? `
+                  <button class="btn btn-warning btn-sm proceder-pago-btn mt-2" data-id="${r.Id}" data-total="${r.CostoFinal || 0}">
+                    <i class="fa-solid fa-credit-card"></i> Proceder al Pago
+                  </button>` : ""}
+
+              </div>
+            </div>
+          </div>`
+                        );
+                    });
+                } catch (e) {
+                    console.error("Error cargando confirmadas:", e);
+                    sinConfirmadas.classList.remove("d-none");
+                }
+            }
+
+            // ==================== CARGAR CARRITO ====================
+            function cargarCarrito() {
+                const carrito = JSON.parse(localStorage.getItem("carritoReservas") || "{}");
+                const lista = carrito.ListaEspacios || [];
+                contCarrito.innerHTML = "";
+
+                if (!lista.length) {
+                    msgVacio.classList.remove("d-none");
+                    resumen.classList.add("d-none");
+                    return;
+                }
+
+                msgVacio.classList.add("d-none");
+                resumen.classList.remove("d-none");
+
+                let subtotal = 0;
+                lista.forEach((r, i) => {
+                    const ini = new Date(r.FechaInicio);
+                    const fin = new Date(r.FechaFinal);
+                    const dias = Math.max(1, Math.ceil((fin - ini) / (1000 * 60 * 60 * 24)));
+                    const costo = (r.CostoDiario || 150) * dias;
+                    subtotal += costo;
+
+                    contCarrito.insertAdjacentHTML(
+                        "beforeend",
+                        `
+        <div class="card card-reserva mb-3 p-3 shadow-sm border-light">
+          <div class="row g-3 align-items-center">
+            <div class="col-md-4">
+              <img src="${r.ImagenUrl || '/static/webapp/imagenes/espacio_placeholder.jpg'}"
+                   class="img-fluid rounded-3 border" alt="Espacio">
+            </div>
+            <div class="col-md-7">
+              <h5 class="text-warning fw-semibold mb-1">Espacio #${r.EspacioId}</h5>
+              <p class="mb-1"><strong>Fechas:</strong> ${ini.toLocaleDateString()} - ${fin.toLocaleDateString()}</p>
+              <p class="mb-1"><strong>Días:</strong> ${dias}</p>
+              <p class="mb-0"><strong>Subtotal:</strong> $${costo.toFixed(2)}</p>
+            </div>
+            <div class="col-md-1 text-end">
+              <button class="btn btn-link text-danger p-0 btn-eliminar" data-index="${i}" title="Eliminar">
+                <i class="fa-solid fa-trash"></i>
+              </button>
+            </div>
+          </div>
+        </div>`
+                    );
+                });
+
+                const iva = subtotal * IVA_PORC;
+                const total = subtotal + iva;
+                subtotalLbl.textContent = `$${subtotal.toFixed(2)}`;
+                ivaLbl.textContent = `$${iva.toFixed(2)}`;
+                totalLbl.textContent = `$${total.toFixed(2)}`;
+            }
+
+            // ==================== EVENTOS GLOBALES ====================
+            document.addEventListener("click", async e => {
+                // 🗑 Eliminar item del carrito
+                const btnDel = e.target.closest(".btn-eliminar");
+                if (btnDel) {
+                    const index = parseInt(btnDel.dataset.index);
+                    const carrito = JSON.parse(localStorage.getItem("carritoReservas") || "{}");
+                    carrito.ListaEspacios.splice(index, 1);
+                    localStorage.setItem("carritoReservas", JSON.stringify(carrito));
+                    cargarCarrito();
+                    return;
+                }
+
+                // 👁 Ver detalles de reserva
+                const btnDetalle = e.target.closest(".ver-detalles-btn");
+                if (btnDetalle) {
+                    const reservaId = btnDetalle.dataset.id;
+                    await mostrarDetallesReserva(reservaId);
+                }
+                // 💳 Proceder al pago (para pre-reserva)
+                const btnPago = e.target.closest(".proceder-pago-btn");
+                if (btnPago) {
+                    const reservaId = parseInt(btnPago.dataset.id);
+                    const monto = parseFloat(btnPago.dataset.total || 0);
+
+                    const {value: formValues} = await Swal.fire({
+                        title: "Simular Pago",
+                        html: `
+      <div class="text-start">
+        <label class="form-label mt-2">💳 Número de Tarjeta</label>
+        <input id="swal-tarjeta" class="swal2-input" placeholder="4111 1111 1111 1111" maxlength="19">
+        <label class="form-label mt-2">🪪 Cédula / ID</label>
+        <input id="swal-cedula" class="swal2-input" placeholder="1234567890" maxlength="15">
+        <label class="form-label mt-2">💰 Monto Total</label>
+        <input id="swal-monto" type="number" class="swal2-input" value="${monto.toFixed(2)}" readonly>
+      </div>
+    `,
+                        focusConfirm: false,
+                        showCancelButton: true,
+                        confirmButtonText: "Confirmar Pago",
+                        confirmButtonColor: "#28a745",
+                        cancelButtonText: "Cancelar",
+                        preConfirm: () => {
+                            const tarjeta = document.getElementById("swal-tarjeta").value.trim();
+                            const cedula = document.getElementById("swal-cedula").value.trim();
+                            if (!tarjeta || !cedula) {
+                                Swal.showValidationMessage("Por favor completa todos los campos");
+                                return false;
+                            }
+                            return {tarjeta, cedula};
+                        }
+                    });
+
+                    if (!formValues) return;
+
+                    // Mostrar carga
+                    Swal.fire({
+                        title: "Procesando pago...",
+                        text: "Por favor espera un momento.",
+                        allowOutsideClick: false,
+                        didOpen: () => Swal.showLoading()
+                    });
+
+                    try {
+                        const datosPago = formValues.cedula.trim();
+                        const resp = await fetch("/api/reservas/confirmar/", {
+                            method: "POST",
+                            headers: {"Content-Type": "application/json"},
+                            body: JSON.stringify({
+                                ReservaId: reservaId,
+                                DatosPago: datosPago,
+                                Monto: monto
+                            })
+                        });
+
+                        const data = await resp.json();
+
+                        if (data.error) {
+                            Swal.fire("Error", data.error, "error");
+                            return;
+                        }
+
+                        Swal.fire({
+                            icon: "success",
+                            title: "Pago Confirmado",
+                            html: `
+        <p>Tu reserva <strong>#${data.ReservaId}</strong> fue confirmada correctamente.</p>
+        <p><strong>Estado:</strong> ${data.Estado || "CONFIRMADA"}</p>
+        <p><strong>Mensaje:</strong> ${data.Mensaje || "Pago procesado exitosamente."}</p>
+      `,
+                            confirmButtonColor: "#FFD700"
+                        });
+
+                        await cargarConfirmadas(); // refresca el listado
+                    } catch (err) {
+                        console.error(err);
+                        Swal.fire("Error", "No se pudo confirmar la reserva.", "error");
+                    }
+                }
+
+            });
+
+            // ==================== CONFIRMAR RESERVAS ====================
+            if (btnConfirmar) {
+                btnConfirmar.addEventListener("click", () => {
+                    Swal.fire({
+                        title: "Confirmar reservas",
+                        text: "¿Deseas confirmar todas las reservas del carrito?",
+                        icon: "question",
+                        showCancelButton: true,
+                        confirmButtonColor: "#FFD700",
+                        cancelButtonText: "Cancelar",
+                        confirmButtonText: "Confirmar"
+                    }).then(r => {
+                        if (r.isConfirmed) {
+                            localStorage.removeItem("carritoReservas");
+                            cargarCarrito();
+                            Swal.fire("✅ Reservas confirmadas", "Tus reservas han sido procesadas correctamente.", "success");
+                        }
+                    });
+                });
+            }
+
+            // ==================== MOSTRAR DETALLES (AJAX) ====================
+            async function mostrarDetallesReserva(reservaId) {
+                try {
+                    const [resRel, resPagos] = await Promise.all([
+                        fetch(`/api/reservas/${reservaId}/detalles/`).then(r => r.json()),
+                        fetch(`/api/reservas/${reservaId}/pagos/`).then(r => r.json())
+                    ]);
+
+                    if (resRel.error || resPagos.error) {
+                        Swal.fire("Error", "No se pudieron obtener los detalles de la reserva.", "error");
+                        return;
+                    }
+
+                    // === Espacios ===
+                    const espaciosHtml = resRel.relaciones.map(e => {
+                        const espacio = e.Espacio || {};
+                        return `
+            <div class="mb-3 border-bottom pb-2">
+              <strong>Espacio:</strong> ${espacio.Nombre || `#${e.EspacioId}`}<br>
+              <strong>Hotel:</strong> ${espacio.NombreHotel || "Sin especificar"}<br>
+              <strong>Tipo:</strong> ${espacio.NombreTipoServicio || "N/A"}<br>
+              <strong>Ubicación:</strong> ${espacio.Ubicacion || "No disponible"}<br>
+              <strong>Capacidad:</strong> ${espacio.Capacidad || "N/A"} personas<br>
+              <strong>Fechas:</strong> ${e.FechaInicio} → ${e.FechaFin}<br>
+              <strong>Costo Calculado:</strong> $${e.CostoCalculado?.toFixed(2) || "0.00"}<br>
+              <small class="text-muted">Registrado: ${e.FechaRegistro || "N/A"}</small>
+            </div>
+          `;
+                    }).join("") || "<p>No se encontraron espacios asociados.</p>";
+
+                    // === Pagos ===
+                    const pagosHtml = resPagos.pagos.map(p => `
+          <div class="mb-2">
+            💳 <strong>${p.Fuente || "Método desconocido"}</strong> - $${p.Monto?.toFixed(2) || "0.00"}<br>
+            <small>${p.FechaPago || "Fecha no disponible"}</small>
+          </div>
+        `).join("") || "<p>No hay pagos registrados para esta reserva.</p>";
+
+                    Swal.fire({
+                        title: `Detalles de la Reserva #${reservaId}`,
+                        html: `
+            <div class="text-start">
+              <h5 class="text-warning">Espacios reservados</h5>
+              ${espaciosHtml}
+              <hr>
+              <h5 class="text-warning">Pagos asociados</h5>
+              ${pagosHtml}
+            </div>
+          `,
+                        width: 750,
+                        confirmButtonText: "Cerrar",
+                        confirmButtonColor: "#FFD700"
+                    });
+
+                } catch (err) {
+                    console.error(err);
+                    Swal.fire("Error", "Hubo un problema al obtener los detalles de la reserva.", "error");
+                }
+            }
+
+            // ==================== INICIALIZAR ====================
+            await cargarConfirmadas();
+            cargarCarrito();
+        });
+    </script>
+
+
+{% endblock %}

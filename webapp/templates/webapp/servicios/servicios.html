@@ -1,0 +1,242 @@
+{% extends "cabezal.html" %}
+{% load static %}
+
+{% block titulo_pagina %}
+    <title>Servicios | RealDeCuenca</title>
+{% endblock %}
+
+{% block css_archivos %}
+    <link rel="stylesheet" href="{% static 'webapp/css/servicios/index_servicios.css' %}">
+{% endblock %}
+
+{% block contenido_pagina %}
+    <!-- ==========================================================
+    SECCIÓN: CONTEXTO RÁPIDO
+    ========================================================== -->
+    <section
+            class="contexto-rapido_contenido_rapido_generales d-flex align-items-center justify-content-center text-center text-white">
+        <img src="{% static 'webapp/imagenes/generales/Foto_Artistica.png' %}" alt="Banner Servicios"
+             class="imagen_contenido_rapido_generales">
+        <div class="overlay_contenido_rapido_generales"></div>
+        <div class="contenido_contenido_rapido_generales">
+            <h1 class="titulo_contenido_rapido_generales">Servicios</h1>
+            <p class="breadcrumb_contenido_rapido_generales">
+                <a href="/" class="link-breadcrumb_contenido_rapido_generales">Inicio</a> / Servicios
+            </p>
+        </div>
+    </section>
+
+    <!-- ==========================================================
+    SECCIÓN: FILTROS Y RESULTADOS
+    ========================================================== -->
+    <section class="servicios_index_servicios py-5">
+        <div class="container">
+            <!-- FILTROS -->
+            <!-- ==========================================================
+            SECCIÓN: FILTROS
+            ========================================================== -->
+            <div class="busqueda_index_servicios container py-4 mb-5">
+                <form id="form-filtros"
+                      class="filtros_index_servicios d-flex flex-wrap align-items-center justify-content-center gap-3">
+
+                    <!-- Ubicaciones -->
+                    <div class="campo_index_servicios">
+                        <select id="filtro-ubicacion" class="form-select input_index_servicios">
+                            <option value="" selected>Ubicaciones</option>
+                            {% for ubicacion in ubicaciones %}
+                                <option value="{{ ubicacion }}">{{ ubicacion }}</option>
+                            {% endfor %}
+                        </select>
+
+                    </div>
+
+                    <!-- Tipo de Servicio / Hotel -->
+                    <div class="campo_index_servicios">
+                        <select id="filtro-hotel" class="form-select input_index_servicios">
+                            <option value="" selected>Tipo de Hotel</option>
+                            {% for hotel in hoteles %}
+                                <option value="{{ hotel }}">{{ hotel }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <!-- Fechas -->
+                    <div class="campo_index_servicios">
+                        <input type="date" id="fecha-inicio" class="form-control input_index_servicios"
+                               placeholder="Fecha Inicial">
+                    </div>
+                    <div class="campo_index_servicios">
+                        <input type="date" id="fecha-fin" class="form-control input_index_servicios"
+                               placeholder="Fecha Final">
+                    </div>
+
+                    <!-- Botón Buscar -->
+                    <div class="campo-boton_index_servicios">
+                        <button type="submit" class="btn btn-buscar_index_servicios">
+                            <i class="fas fa-search"></i>
+                        </button>
+                    </div>
+                </form>
+            </div>
+
+            <!-- RESULTADOS -->
+            <div id="contenedor-espacios" class="resultados_index_servicios"></div>
+            <p id="contador-espacios" class="text-secondary text-center"></p>
+
+            <!-- LOADER -->
+            <div id="loader" class="loader-overlay" style="display:none;">
+                <div class="spinner"></div>
+                <p class="loader-text">Cargando más resultados...</p>
+            </div>
+
+            <!-- FIN DE LISTA -->
+            <div id="fin-lista" class="text-center text-muted py-3" style="display:none;">
+                No hay más servicios para mostrar.
+            </div>
+        </div>
+    </section>
+{% endblock %}
+
+{% block jvscript_archivos_defer %}
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"
+            integrity="sha256-/xUj+3OJ+Y3VdQbsw3fDdU/L3r9j8Qtw4QYY7X3lIJo="
+            crossorigin="anonymous"></script>
+
+    <script>
+        let paginaActual = 1;
+        const tamanoPagina = 5;
+        let cargando = false;
+        let finDeDatos = false;
+        let totalCargados = 0;
+
+        function formatearCosto(moneda, costo) {
+            const n = Number(costo);
+            return `${moneda || '$'} ${isNaN(n) ? '0.00' : n.toFixed(2)}`;
+        }
+
+        function renderizarCard(e) {
+            const amenidadesHtml = (e.Amenidades && e.Amenidades.length > 0)
+                ? e.Amenidades.map(a => `<span class="badge-amenidad"><i class="fas fa-check-circle"></i> ${a}</span>`).join(" ")
+                : "";
+
+            const delay = (Math.random() * 0.35).toFixed(2);
+
+            return `
+        <div class="tarjeta_index_servicios shadow mb-4 d-flex flex-column flex-md-row align-items-stretch animate__animated animate__fadeInUp"
+             style="animation-delay:${delay}s;">
+            <div class="imagen-contenedor_index_servicios me-md-4 mb-3 mb-md-0">
+                <img src="${e.ImagenPrincipal}" alt="${e.Nombre}"
+                     class="img-fluid rounded imagen-fade"
+                     style="object-fit: cover; height: 220px; width: 100%;"
+                     onload="this.classList.add('loaded')">
+            </div>
+            <div class="detalle_index_servicios flex-grow-1">
+                <h5 class="titulo_index_servicios">${e.Nombre}</h5>
+                <p><strong>Hotel:</strong> ${e.NombreHotel || '—'}</p>
+                <p><strong>Tipo de Servicio:</strong> ${e.NombreTipoServicio || '—'}</p>
+                <p><strong>Tipo de Alimentación:</strong> ${e.NombreTipoAlimentacion || '—'}</p>
+                <p><strong>Ubicación:</strong> ${e.Ubicacion || '—'}</p>
+                <p><strong>Descripción:</strong> ${e.DescripcionDelLugar || '—'}</p>
+                <p><strong>Capacidad:</strong> ${e.Capacidad || '—'}</p>
+                <p><strong>Costo diario:</strong>
+                   <span class="text-success fw-bold">${formatearCosto(e.Moneda, e.CostoDiario)}</span>
+                </p>
+                <div class="d-flex flex-wrap gap-2 mb-3">${amenidadesHtml}</div>
+                <a href="/servicios/detalle/${e.Id}" class="btn-vermas_index_servicios">
+                    Ver alojamiento
+                </a>
+            </div>
+        </div>`;
+        }
+
+        function cargarEspacios(reset = false) {
+            if (cargando || finDeDatos) return;
+            cargando = true;
+            $("#loader").fadeIn(150);
+
+            if (reset) {
+                paginaActual = 1;
+                totalCargados = 0;
+                finDeDatos = false;
+                $("#contenedor-espacios").empty();
+                $("#contador-espacios").hide();
+                $("#fin-lista").hide();
+            }
+
+            function formatearFechaSoap(fecha) {
+                if (!fecha) return "";
+                return `${fecha}T00:00:00`; // formato ISO requerido
+            }
+
+            const filtros = {
+                pagina: paginaActual,
+                tamanoPagina: tamanoPagina,
+                ubicacion: $("#filtro-ubicacion").val(),
+                hotel: $("#filtro-hotel").val(),
+                fechaInicio: formatearFechaSoap($("#fecha-inicio").val()),
+                fechaFin: formatearFechaSoap($("#fecha-fin").val())
+            };
+
+
+            $.getJSON("{% url 'cargar_espacios' %}", filtros)
+                .done(function (response) {
+                    const ok = response && response.success === true;
+                    const lista = (ok && Array.isArray(response.datos)) ? response.datos : [];
+
+                    if (ok) {
+                        if (lista.length > 0) {
+                            const html = lista.map(renderizarCard).join("");
+                            $("#contenedor-espacios").append(html);
+
+                            totalCargados += lista.length;
+                            $("#contador-espacios")
+                                .show()
+                                .html(`Se han cargado <strong>${totalCargados}</strong> hospedajes disponibles`);
+
+                            paginaActual++;
+                            const total = Number(response.total || 0);
+                            if (totalCargados >= total) {
+                                finDeDatos = true;
+                                $("#fin-lista").fadeIn();
+                            }
+                        } else {
+                            $("#contenedor-espacios").html(`
+                        <div class="alert alert-warning text-center mt-3">
+                            <i class="fas fa-exclamation-circle"></i> No se encontraron resultados para los filtros aplicados.
+                        </div>
+                    `);
+                            $("#contador-espacios").hide();
+                            $("#fin-lista").hide();
+                            finDeDatos = false;
+                        }
+                    } else {
+                        alert(response.error || "Error inesperado al procesar la solicitud.");
+                    }
+                })
+                .fail(function () {
+                    alert("Error al cargar los servicios.");
+                })
+                .always(function () {
+                    cargando = false;
+                    $("#loader").fadeOut(150);
+                });
+        }
+
+        $(document).ready(function () {
+            // Cargar al inicio
+            cargarEspacios();
+
+            // Scroll infinito
+            $(window).on("scroll", function () {
+                const nearBottom = $(window).scrollTop() + $(window).height() >= $(document).height() - 150;
+                if (nearBottom && !finDeDatos) cargarEspacios();
+            });
+
+            // Búsqueda por filtros
+            $("#form-filtros").on("submit", function (e) {
+                e.preventDefault();
+                cargarEspacios(true);
+            });
+        });
+    </script>
+{% endblock %}

@@ -1,0 +1,44 @@
+{% load static %}
+
+
+<footer class="footer_footer_generales text-white pt-5 pb-3">
+    <div class="container footer-contenedor_footer_generales">
+        <div class="row gy-4 align-items-start text-center text-md-start">
+            <div class="col-md-4">
+                <div class="footer-logo_footer_generales mb-3">
+                    <img src="{% static 'webapp/imagenes/generales/Logo_Quitus_Arte.png' %}" alt="Logo QuitusArte">
+                </div>
+                <p class="footer-descripcion_footer_generales">
+                    QuitusArte conecta el arte con los espacios de Quito,
+                    promoviendo la creatividad, la inclusión y la colaboración cultural.
+                </p>
+            </div>
+
+            <div class="col-md-4">
+                <h5 class="footer-titulo_footer_generales mb-4">Enlaces</h5>
+                <ul class="footer-links_footer_generales list-unstyled">
+                    <li><a href="{% url 'home' %}">Inicio</a></li>
+                    <li><a href="#nosotros">Nosotros</a></li>
+                    <li><a href="{% url 'servicios' %}">Servicios</a></li>
+                    <li><a href="#contacto">Contacto</a></li>
+                </ul>
+            </div>
+
+            <div class="col-md-4">
+                <h5 class="footer-titulo_footer_generales mb-4">Síguenos</h5>
+                <div class="footer-redes_footer_generales">
+                    <a href="#" aria-label="Facebook"><i class="fab fa-facebook-f"></i></a>
+                    <a href="#" aria-label="Instagram"><i class="fab fa-instagram"></i></a>
+                    <a href="#" aria-label="Twitter"><i class="fab fa-twitter"></i></a>
+                    <a href="#" aria-label="YouTube"><i class="fab fa-youtube"></i></a>
+                </div>
+            </div>
+        </div>
+
+        <hr class="footer-separador_footer_generales my-4">
+
+        <div class="text-center small footer-copy_footer_generales">
+            © 2025 <strong>QuitusArte</strong> — Pontificia Universidad Católica del Ecuador
+        </div>
+    </div>
+</footer>

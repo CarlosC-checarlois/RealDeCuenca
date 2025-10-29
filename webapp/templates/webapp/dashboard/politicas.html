@@ -1,0 +1,262 @@
+{% extends 'cabezal.html' %}
+{% load static %}
+
+{% block titulo_pagina %}
+    <title>CRUD Políticas | Panel Admin</title>
+{% endblock %}
+
+{% block contenido_pagina %}
+        <!-- CONTEXTO RAPIDO -->
+    <!-- CONTEXTO RAPIDO -->
+    <!-- CONTEXTO RAPIDO -->
+    <section
+            class="contexto-rapido_contenido_rapido_generales d-flex align-items-center justify-content-center text-center text-white">
+        <!-- Imagen de fondo directa -->
+        <img src="{% static '/webapp/imagenes/dashboard/dashboard_imagen.png' %}" alt="Banner Servicios"
+             class="imagen_contenido_rapido_generales">
+
+        <!-- Capa oscura superpuesta -->
+        <div class="overlay_contenido_rapido_generales"></div>
+
+        <!-- Contenido central -->
+        <div class="contenido_contenido_rapido_generales">
+            <h1 class="titulo_contenido_rapido_generales">Dashboard</h1>
+            <p class="breadcrumb_contenido_rapido_generales">
+                <a href="/dashboard/" class="link-breadcrumb_contenido_rapido_generales">Dashboard</a> › Politicas
+            </p>
+        </div>
+    </section>
+
+    <!-- CONTEXTO RAPIDO -->
+    <!-- CONTEXTO RAPIDO -->
+    <!-- CONTEXTO RAPIDO -->
+    <section class="py-5 bg-light min-vh-100">
+        <div class="container">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h2 class="fw-bold">Gestión de Políticas</h2>
+                <button class="btn btn-warning fw-semibold" id="btnNuevaPolitica">
+                    <i class="fa-solid fa-plus me-2"></i> Nueva Política
+                </button>
+            </div>
+
+            <!-- Tabla de políticas -->
+            <div class="card shadow-sm border-0">
+                <div class="card-body table-responsive">
+                    <table class="table table-hover align-middle" id="tablaPoliticas">
+                        <thead class="table-dark">
+                        <tr>
+                            <th>ID</th>
+                            <th>Descripción</th>
+                            <th>Fecha Registro</th>
+                            <th>Última Modificación</th>
+                            <th>Activo</th>
+                            <th class="text-center">Acciones</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        <tr>
+                            <td colspan="6" class="text-center text-muted py-4">
+                                <div class="spinner-border text-warning" role="status"></div>
+                                <p class="mt-2 mb-0">Cargando políticas...</p>
+                            </td>
+                        </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Modal Crear/Editar -->
+    <div class="modal fade" id="modalPolitica" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content border-0 shadow">
+                <div class="modal-header bg-warning text-dark">
+                    <h5 class="modal-title fw-bold" id="tituloModal">Nueva Política</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <form id="formPolitica">
+                    <div class="modal-body">
+                        <input type="hidden" id="idPolitica"/>
+
+                        <div class="mb-3">
+                            <label for="descripcionPolitica" class="form-label fw-semibold">Descripción</label>
+                            <textarea class="form-control" id="descripcionPolitica" rows="3" required></textarea>
+                        </div>
+
+                        <div class="form-check form-switch mb-3">
+                            <input class="form-check-input" type="checkbox" id="esActivo" checked/>
+                            <label class="form-check-label" for="esActivo">Activo</label>
+                        </div>
+                    </div>
+
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                        <button type="submit" class="btn btn-warning fw-semibold">Guardar</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+{% endblock %}
+
+{% block jvscript_archivos_defer %}
+    <script>
+        document.addEventListener("DOMContentLoaded", () => {
+            const tabla = document.querySelector("#tablaPoliticas tbody");
+            const modal = new bootstrap.Modal(document.getElementById("modalPolitica"));
+            const form = document.getElementById("formPolitica");
+            const btnNueva = document.getElementById("btnNuevaPolitica");
+
+            // ===============================
+            // 🔹 Cargar políticas
+            // ===============================
+            async function cargarPoliticas() {
+                tabla.innerHTML = `
+      <tr>
+        <td colspan="6" class="text-center text-muted py-4">
+          <div class="spinner-border text-warning" role="status"></div>
+          <p class="mt-2 mb-0">Cargando políticas...</p>
+        </td>
+      </tr>
+    `;
+
+                try {
+                    const resp = await fetch("/api/politicas/");
+                    const data = await resp.json();
+
+                    if (!data.exito) throw new Error(data.error || "Error al obtener políticas");
+
+                    if (!data.politicas || data.politicas.length === 0) {
+                        tabla.innerHTML = `
+          <tr><td colspan="6" class="text-center text-muted py-3">No se encontraron políticas activas.</td></tr>
+        `;
+                        return;
+                    }
+
+                    tabla.innerHTML = "";
+                    data.politicas.forEach(p => {
+                        tabla.insertAdjacentHTML("beforeend", `
+          <tr>
+            <td>${p.Id}</td>
+            <td>${p.DescripcionPolitica}</td>
+            <td>${p.FechaRegistro || '-'}</td>
+            <td>${p.UltimaFechaCambio || '-'}</td>
+            <td>${p.EsActivo ? '✅' : '❌'}</td>
+            <td class="text-center">
+              <button class="btn btn-sm btn-outline-primary me-2" onclick="editarPolitica(${p.Id}, '${p.DescripcionPolitica.replace(/'/g, "\\'")}', ${p.EsActivo})">
+                <i class="fa-solid fa-pen"></i>
+              </button>
+              <button class="btn btn-sm btn-outline-danger" onclick="eliminarPolitica(${p.Id})">
+                <i class="fa-solid fa-trash"></i>
+              </button>
+            </td>
+          </tr>
+        `);
+                    });
+                } catch (err) {
+                    console.error("❌ Error:", err);
+                    tabla.innerHTML = `<tr><td colspan="6" class="text-center text-danger py-3">Error al cargar políticas.</td></tr>`;
+                }
+            }
+
+            cargarPoliticas();
+
+            // ===============================
+            // 🆕 Crear nueva
+            // ===============================
+            btnNueva.addEventListener("click", () => {
+                document.getElementById("tituloModal").innerText = "Nueva Política";
+                form.reset();
+                document.getElementById("idPolitica").value = "";
+                modal.show();
+            });
+
+            // ===============================
+            // ✏️ Editar política
+            // ===============================
+            window.editarPolitica = (id, desc, activo) => {
+                document.getElementById("tituloModal").innerText = "Editar Política";
+                document.getElementById("idPolitica").value = id;
+                document.getElementById("descripcionPolitica").value = desc;
+                document.getElementById("esActivo").checked = activo;
+                modal.show();
+            };
+
+            // ===============================
+            // 🗑️ Eliminar política
+            // ===============================
+            window.eliminarPolitica = async (id) => {
+                const confirm = await Swal.fire({
+                    title: "¿Eliminar política?",
+                    text: "Esta acción no se puede deshacer.",
+                    icon: "warning",
+                    showCancelButton: true,
+                    confirmButtonText: "Sí, eliminar",
+                    cancelButtonText: "Cancelar",
+                    confirmButtonColor: "#d33"
+                });
+
+                if (!confirm.isConfirmed) return;
+
+                const resp = await fetch(`/api/politicas/${id}/`, {method: "DELETE"});
+                const data = await resp.json();
+
+                Swal.fire({
+                    icon: data.exito ? "success" : "error",
+                    title: data.exito ? "Eliminada" : "Error",
+                    text: data.mensaje || "Error al eliminar.",
+                    confirmButtonColor: "#FFD700"
+                });
+
+                if (data.exito) cargarPoliticas();
+            };
+
+            // ===============================
+            // 💾 Guardar política (crear o actualizar)
+            // ===============================
+            form.addEventListener("submit", async (e) => {
+                e.preventDefault();
+                const id = document.getElementById("idPolitica").value;
+                const desc = document.getElementById("descripcionPolitica").value.trim();
+                const activo = document.getElementById("esActivo").checked;
+
+                if (!desc) {
+                    Swal.fire("Atención", "La descripción no puede estar vacía.", "warning");
+                    return;
+                }
+
+                const payload = {
+                    Id: parseInt(id) || 0,
+                    DescripcionPolitica: desc,
+                    FechaRegistro: new Date().toISOString(),
+                    UltimaFechaCambio: new Date().toISOString(),
+                    EsActivo: activo
+                };
+
+                const method = id ? "PUT" : "POST";
+                const url = id ? `/api/politicas/${id}/` : "/api/politicas/";
+
+                const resp = await fetch(url, {
+                    method,
+                    headers: {"Content-Type": "application/json"},
+                    body: JSON.stringify(payload)
+                });
+
+                const data = await resp.json();
+
+                Swal.fire({
+                    icon: data.exito ? "success" : "error",
+                    title: data.exito ? "Guardado" : "Error",
+                    text: data.mensaje || "Error al guardar.",
+                    confirmButtonColor: "#FFD700"
+                });
+
+                if (data.exito) {
+                    modal.hide();
+                    cargarPoliticas();
+                }
+            });
+        });
+    </script>
+{% endblock %}

@@ -1,0 +1,162 @@
+{% extends 'cabezal.html' %}
+{% load static %}
+
+{% block titulo_pagina %}
+    <title>Perfil de Usuario | QuitusArte</title>
+{% endblock %}
+
+{% block css_archivos %}
+    <style>
+        body {
+            background-color: #f9fafc;
+        }
+
+        .perfil-card {
+            max-width: 600px;
+            margin: 50px auto;
+            background: #fff;
+            border-radius: 15px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+            padding: 30px;
+        }
+
+        .perfil-header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .perfil-header img {
+            width: 100px;
+            height: 100px;
+            border-radius: 50%;
+            object-fit: cover;
+            margin-bottom: 15px;
+        }
+
+        .perfil-header h3 {
+            color: #f5b301;
+            font-weight: 700;
+        }
+
+        .btn-cerrar-sesion {
+            background-color: #f5b301;
+            border: none;
+            color: #fff;
+            font-weight: 600;
+            padding: 10px 20px;
+            border-radius: 10px;
+            transition: 0.2s;
+        }
+
+        .btn-cerrar-sesion:hover {
+            background-color: #d39e00;
+        }
+    </style>
+{% endblock %}
+
+{% block contenido_pagina %}
+    <!-- CONTEXTO RAPIDO -->
+    <!-- CONTEXTO RAPIDO -->
+    <!-- CONTEXTO RAPIDO -->
+    <section
+            class="contexto-rapido_contenido_rapido_generales d-flex align-items-center justify-content-center text-center text-white">
+        <!-- Imagen de fondo directa -->
+        <img src="{% static '/webapp/imagenes/carrito/carrito_imagen_1.png' %}" alt="Banner Servicios"
+             class="imagen_contenido_rapido_generales">
+
+        <!-- Capa oscura superpuesta -->
+        <div class="overlay_contenido_rapido_generales"></div>
+
+        <!-- Contenido central -->
+        <div class="contenido_contenido_rapido_generales">
+            <h1 class="titulo_contenido_rapido_generales">Perfil</h1>
+            <p class="breadcrumb_contenido_rapido_generales">
+                <a href="/" class="link-breadcrumb_contenido_rapido_generales">Inicio</a> › Perfil
+            </p>
+        </div>
+    </section>
+
+    <!-- CONTEXTO RAPIDO -->
+    <!-- CONTEXTO RAPIDO -->
+    <!-- CONTEXTO RAPIDO -->
+    <section class="container py-5 mt-4">
+        <div class="perfil-card">
+            <div class="perfil-header">
+                <h3 id="nombreUsuario">Cargando...</h3>
+                <p class="text-muted" id="emailUsuario"></p>
+            </div>
+
+            <div class="mb-4">
+                <p><strong>ID:</strong> <span id="idUsuario">-</span></p>
+                <p><strong>Rol:</strong> <span id="rolUsuario">-</span></p>
+                <p><strong>Fecha de registro:</strong> <span id="fechaRegistro">-</span></p>
+                <p><strong>Último inicio de sesión:</strong> <span id="ultimaSesion">-</span></p>
+                <p><strong>Estado:</strong> <span id="estadoUsuario">-</span></p>
+            </div>
+
+            <div class="text-center">
+                <button id="btnCerrarSesion" class="btn-cerrar-sesion">
+                    <i class="fa-solid fa-right-from-bracket me-2"></i> Cerrar sesión
+                </button>
+            </div>
+        </div>
+    </section>
+{% endblock %}
+
+{% block jvscript_archivos_defer %}
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script>
+        document.addEventListener("DOMContentLoaded", async () => {
+            const sesion = JSON.parse(localStorage.getItem("usuarioSesion") || "{}");
+
+            if (!sesion.Id) {
+                Swal.fire("Sesión requerida", "Inicia sesión para ver tu perfil.", "warning")
+                    .then(() => window.location.href = "/login/");
+                return;
+            }
+
+            const usuarioId = {{ view.kwargs.usuario_id }};
+            try {
+                const resp = await fetch(`/api/usuario/${usuarioId}/`);
+                const data = await resp.json();
+
+                if (!data.exito || !data.usuario) {
+                    Swal.fire("Error", "No se pudieron obtener los datos del usuario.", "error");
+                    return;
+                }
+
+                const u = data.usuario;
+                document.getElementById("nombreUsuario").textContent = u.Nombre || "Sin nombre";
+                document.getElementById("emailUsuario").textContent = u.Email || "Sin correo";
+                document.getElementById("idUsuario").textContent = u.Id || "-";
+                document.getElementById("rolUsuario").textContent = u.Rol || "-";
+                document.getElementById("fechaRegistro").textContent = u.FechaRegistro || "-";
+                document.getElementById("ultimaSesion").textContent = u.UltimaFechainicioSesion || "-";
+                document.getElementById("estadoUsuario").textContent = u.EsActivo ? "Activo ✅" : "Inactivo ❌";
+
+            } catch (error) {
+                console.error(error);
+                Swal.fire("Error", "No se pudo conectar con el servicio de usuario.", "error");
+            }
+
+            // ========== CERRAR SESIÓN ==========
+            document.getElementById("btnCerrarSesion").addEventListener("click", () => {
+                Swal.fire({
+                    title: "¿Cerrar sesión?",
+                    text: "Tu sesión actual se cerrará.",
+                    icon: "warning",
+                    showCancelButton: true,
+                    confirmButtonText: "Sí, salir",
+                    cancelButtonText: "Cancelar",
+                    confirmButtonColor: "#f5b301"
+                }).then(result => {
+                    if (result.isConfirmed) {
+                        localStorage.removeItem("usuarioSesion");
+                        localStorage.removeItem("carritoReservas");
+                        window.location.href = "/login/";
+                    }
+                });
+            });
+        });
+    </script>
+{% endblock %}
