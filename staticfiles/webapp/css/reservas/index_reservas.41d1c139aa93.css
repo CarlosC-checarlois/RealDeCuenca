@@ -1,0 +1,164 @@
+/* =============================================
+   RESERVAS - QUITUSARTE
+   ============================================= */
+
+.reservas_index_reservas {
+    font-family: "Segoe UI", sans-serif;
+    color: #222;
+}
+
+/* ========== Título principal ========== */
+.titulo_index_reservas {
+    font-size: 26px;
+    font-weight: 700;
+    color: #f7c948;
+}
+
+.subtitulo_index_reservas {
+    font-size: 18px;
+    font-weight: 500;
+    color: #444;
+}
+
+/* ========== Bloques de reserva ========== */
+.bloque_index_reservas {
+    background: #fff;
+    border: 1px solid rgba(0, 0, 0, 0.08);
+    border-radius: 12px;
+    padding: 20px;
+    margin-bottom: 20px;
+    transition: all 0.25s ease;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.03);
+}
+
+.bloque_index_reservas:hover {
+    background: #fffef9;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+    transform: translateY(-2px);
+}
+
+/* ========== Imagen del espacio ========== */
+.img-reserva_index_reservas {
+    width: 150px;
+    height: 120px;
+    object-fit: cover;
+    border-radius: 10px;
+    border: 1px solid rgba(0, 0, 0, 0.05);
+}
+
+/* ========== Textos internos ========== */
+.titulo-card_index_reservas {
+    font-size: 18px;
+    font-weight: 600;
+    color: #111;
+}
+
+.texto-base_index_reservas {
+    font-size: 14px;
+    color: #444;
+}
+
+.texto-secundario_index_reservas {
+    font-size: 12px;
+    color: #777;
+}
+
+/* ========== Estado de la reserva ========== */
+.estado_index_reservas {
+    font-size: 13px;
+    font-weight: 600;
+    text-transform: uppercase;
+    padding: 5px 10px;
+    border-radius: 6px;
+    display: inline-block;
+    letter-spacing: 0.5px;
+}
+
+.estado-confirmada_index_reservas {
+    background-color: rgba(40, 167, 69, 0.1);
+    color: #28a745;
+    border: 1px solid rgba(40, 167, 69, 0.2);
+}
+
+.estado-pendiente_index_reservas {
+    background-color: rgba(255, 193, 7, 0.1);
+    color: #ffc107;
+    border: 1px solid rgba(255, 193, 7, 0.2);
+}
+
+/* ========== Resumen Totales ========== */
+.resumen_index_reservas {
+    background: #fff9e6;
+    border: 1px solid rgba(255, 215, 0, 0.3);
+    border-radius: 10px;
+    padding: 20px;
+}
+
+.texto-total_index_reservas {
+    font-size: 18px;
+    font-weight: 600;
+    color: #111;
+}
+
+.texto-total_index_reservas span {
+    color: #28a745;
+}
+
+/* ========== Botones ========== */
+.btn-confirmar_index_reservas {
+    background-color: #FFD700;
+    color: #111;
+    border: none;
+    font-size: 14px;
+    font-weight: 600;
+    border-radius: 8px;
+    padding: 10px 24px;
+    transition: background 0.3s ease, transform 0.2s ease;
+}
+
+.btn-confirmar_index_reservas:hover {
+    background-color: #e6c200;
+    transform: translateY(-1px);
+}
+
+/* ========== Reserva vacía ========== */
+.reservas-vacias_index_reservas {
+    text-align: center;
+    padding: 40px 0;
+    color: #777;
+}
+
+.reservas-vacias_index_reservas i {
+    color: #FFD700;
+    font-size: 42px;
+    margin-bottom: 10px;
+}
+
+.reservas-vacias_index_reservas p {
+    font-size: 14px;
+}
+
+/* ========== Responsivo ========== */
+@media (max-width: 768px) {
+    .img-reserva_index_reservas {
+        width: 120px;
+        height: 90px;
+    }
+
+    .titulo-card_index_reservas {
+        font-size: 16px;
+    }
+
+    .texto-base_index_reservas {
+        font-size: 13px;
+    }
+
+    .resumen_index_reservas {
+        padding: 15px;
+    }
+
+    .btn-confirmar_index_reservas {
+        font-size: 13px;
+        padding: 8px 18px;
+    }
+}

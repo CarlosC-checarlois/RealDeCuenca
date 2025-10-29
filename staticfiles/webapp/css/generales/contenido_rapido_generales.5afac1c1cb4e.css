@@ -1,0 +1,85 @@
+/* ==========================================================
+   SECCIÓN CONTEXTO RÁPIDO - QuitusArte
+   Nomenclatura: _contenido_rapido_generales
+   ========================================================== */
+
+.contexto-rapido_contenido_rapido_generales {
+    position: relative;
+    height: 30vh; /* Solo 30% de la altura visible */
+    min-height: 220px;
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    background-color: #000; /* color de respaldo */
+}
+
+/* Imagen de fondo */
+.imagen_contenido_rapido_generales {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: center;
+    z-index: 0;
+    filter: brightness(70%);
+}
+
+/* Capa de oscurecimiento */
+.overlay_contenido_rapido_generales {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.45);
+    z-index: 1;
+}
+
+/* Contenido central */
+.contenido_contenido_rapido_generales {
+    position: relative;
+    z-index: 2;
+    color: #fff;
+}
+
+/* Título principal */
+.titulo_contenido_rapido_generales {
+    font-size: 32px;
+    font-weight: 700;
+    letter-spacing: 1px;
+    margin-bottom: 8px;
+    text-transform: uppercase;
+    text-shadow: 0 2px 6px rgba(0, 0, 0, 0.6);
+}
+
+/* Breadcrumb */
+.breadcrumb_contenido_rapido_generales {
+    font-size: 14px;
+    font-weight: 500;
+    color: #ddd;
+}
+
+.link-breadcrumb_contenido_rapido_generales {
+    color: #FFD700;
+    text-decoration: none;
+    transition: color 0.3s ease;
+}
+
+.link-breadcrumb_contenido_rapido_generales:hover {
+    color: #fff;
+}
+
+/* Responsivo */
+@media (max-width: 768px) {
+    .titulo_contenido_rapido_generales {
+        font-size: 24px;
+    }
+
+    .breadcrumb_contenido_rapido_generales {
+        font-size: 13px;
+    }
+}

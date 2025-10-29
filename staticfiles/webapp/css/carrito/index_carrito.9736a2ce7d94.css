@@ -1,0 +1,118 @@
+/* =============================================
+   CARRITO - QUITUSARTE
+   ============================================= */
+
+.carrito_index_carrito {
+    font-family: "Segoe UI", sans-serif;
+    color: #222;
+}
+
+/* Título principal */
+.titulo_index_carrito {
+    font-size: 22px;
+    font-weight: 600;
+    color: #111;
+}
+
+/* Subtítulos y textos */
+.subtitulo_index_carrito {
+    font-size: 18px;
+    color: #111;
+}
+
+.texto-base_index_carrito {
+    font-size: 14px;
+    color: #444;
+}
+
+.texto-auxiliar_index_carrito {
+    font-size: 11px;
+    color: #777;
+}
+
+/* Ítems */
+.item_index_carrito {
+    background: #f9f9f9;
+    border: 1px solid rgba(0, 0, 0, 0.1);
+    border-radius: 10px;
+    transition: all 0.2s ease;
+}
+
+.item_index_carrito:hover {
+    background: #fff;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+/* Imagen */
+.img-carrito_index_carrito {
+    width: 120px;
+    height: 100px;
+    object-fit: cover;
+    border-radius: 8px;
+    border: 1px solid rgba(0, 0, 0, 0.05);
+}
+
+/* Botón eliminar */
+.btn-eliminar_index_carrito {
+    background: none;
+    border: none;
+    color: #888;
+    font-size: 18px;
+    transition: color 0.2s ease;
+}
+
+.btn-eliminar_index_carrito:hover {
+    color: #dc3545;
+}
+
+/* Resumen */
+.resumen_index_carrito {
+    background: #fff9e6;
+    border: 1px solid rgba(255, 215, 0, 0.4);
+    border-radius: 10px;
+}
+
+.texto-total_index_carrito {
+    font-size: 18px;
+    color: #111;
+}
+
+.btn-confirmar_index_carrito {
+    background-color: #FFD700;
+    color: #111;
+    border: none;
+    font-size: 14px;
+    font-weight: 600;
+    border-radius: 8px;
+    padding: 10px 24px;
+    transition: background 0.3s ease;
+}
+
+.btn-confirmar_index_carrito:hover {
+    background-color: #e6c200;
+}
+
+/* Carrito vacío */
+.carrito-vacio_index_carrito i {
+    color: #FFD700;
+}
+
+.carrito-vacio_index_carrito p {
+    font-size: 14px;
+}
+
+/* Responsivo */
+@media (max-width: 768px) {
+    .img-carrito_index_carrito {
+        width: 100px;
+        height: 80px;
+    }
+
+    .subtitulo_index_carrito {
+        font-size: 16px;
+    }
+
+    .texto-base_index_carrito {
+        font-size: 13px;
+    }
+}

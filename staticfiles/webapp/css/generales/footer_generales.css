@@ -1,0 +1,148 @@
+/* ===================================================
+   FOOTER INSTITUCIONAL QUITUSARTe (versión refinada)
+   Nomenclatura: _footer_generales_
+   =================================================== */
+
+.footer_footer_generales {
+    background: linear-gradient(180deg, #111 0%, #000 100%);
+    color: #f5f5f5;
+    font-family: 'Segoe UI', sans-serif;
+    position: relative;
+    overflow: hidden;
+    border-top: 1px solid rgba(255, 215, 0, 0.1);
+}
+
+/* 💡 Halo sutil superior */
+.footer_footer_generales::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 120%;
+    height: 120px;
+    pointer-events: none;
+}
+
+/* Contenedor principal */
+.footer-contenedor_footer_generales {
+    max-width: 1100px;
+}
+
+/* LOGO */
+.footer-logo_footer_generales img {
+    height: 70px;
+    width: auto;
+    object-fit: contain;
+    filter: drop-shadow(0 2px 4px rgba(255, 215, 0, 0.2));
+    transition: transform 0.3s ease, filter 0.3s ease;
+}
+.footer-logo_footer_generales img:hover {
+    transform: scale(1.05);
+    filter: drop-shadow(0 4px 8px rgba(255, 215, 0, 0.4));
+}
+
+/* DESCRIPCIÓN */
+.footer-descripcion_footer_generales {
+    font-size: 14px;
+    color: #ccc;
+    line-height: 1.7;
+    max-width: 350px;
+    margin: 0 auto;
+    text-align: justify;
+}
+
+/* TÍTULOS */
+.footer-titulo_footer_generales {
+    font-size: 17px;
+    font-weight: 600;
+    color: #FFD700;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin-bottom: 15px;
+    border-bottom: 1.5px solid rgba(255, 215, 0, 0.3);
+    display: inline-block;
+    padding-bottom: 5px;
+}
+
+/* ENLACES */
+.footer-links_footer_generales li {
+    margin: 8px 0;
+}
+
+.footer-links_footer_generales a {
+    color: #eee;
+    text-decoration: none;
+    font-size: 14px;
+    transition: color 0.3s ease, padding-left 0.3s ease;
+}
+
+.footer-links_footer_generales a:hover {
+    color: #FFD700;
+    padding-left: 5px;
+}
+
+/* REDES SOCIALES */
+.footer-redes_footer_generales {
+    margin-top: 5px;
+}
+.footer-redes_footer_generales a {
+    display: inline-flex;
+    justify-content: center;
+    align-items: center;
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    background-color: rgba(255, 255, 255, 0.08);
+    color: #f5f5f5;
+    font-size: 16px;
+    margin: 0 6px;
+    transition: all 0.3s ease;
+}
+.footer-redes_footer_generales a:hover {
+    background-color: #FFD700;
+    color: #000;
+    transform: translateY(-3px);
+}
+
+/* SEPARADOR */
+.footer-separador_footer_generales {
+    border: none;
+    height: 1px;
+    background: linear-gradient(90deg, rgba(255, 215, 0, 0.2) 0%, rgba(255, 215, 0, 0.05) 100%);
+    margin: 30px 0 15px;
+}
+
+/* COPYRIGHT */
+.footer-copy_footer_generales {
+    font-size: 12px;
+    color: #bbb;
+    opacity: 0.85;
+    letter-spacing: 0.4px;
+}
+.footer-copy_footer_generales strong {
+    color: #FFD700;
+    font-weight: 600;
+}
+
+/* ------------------------------
+   RESPONSIVE
+   ------------------------------ */
+@media (max-width: 768px) {
+    .footer_footer_generales {
+        text-align: center;
+    }
+    .footer-titulo_footer_generales {
+        font-size: 16px;
+        margin-top: 10px;
+    }
+    .footer-descripcion_footer_generales {
+        font-size: 13px;
+        max-width: 90%;
+    }
+    .footer-redes_footer_generales a {
+        margin: 0 8px;
+        width: 34px;
+        height: 34px;
+    }
+}

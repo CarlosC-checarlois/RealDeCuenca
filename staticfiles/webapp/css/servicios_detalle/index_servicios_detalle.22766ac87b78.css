@@ -1,0 +1,313 @@
+/* ==========================================================
+   DETALLE DE SERVICIO - QuitusArte
+   Nomenclatura: _index_servicios
+   ========================================================== */
+
+.detalle_index_servicios {
+    background-color: #fff;
+    font-family: 'Segoe UI', sans-serif;
+    color: #222;
+    padding-top: 40px;
+    padding-bottom: 60px;
+}
+
+.titulo-detalle_index_servicios {
+    font-weight: 700;
+    color: #222;
+    font-size: 30px;
+    margin-bottom: 6px;
+}
+
+.subtitulo-detalle_index_servicios {
+    font-size: 15px;
+    color: #6c757d;
+}
+
+.galeria_index_servicios {
+    width: 100%;
+}
+
+.img-principal_index_servicios {
+    width: 100%;
+    height: 420px;
+    object-fit: cover;
+    border-radius: 14px;
+    box-shadow: 0 6px 24px rgba(0, 0, 0, 0.12);
+    transition: transform 0.35s ease, opacity 0.35s ease;
+    display: block;
+}
+
+.img-principal_index_servicios:hover {
+    transform: scale(1.01);
+}
+
+.miniaturas_index_servicios {
+    margin-top: 12px;
+}
+
+.miniaturas_index_servicios img {
+    width: 86px;
+    height: 66px;
+    object-fit: cover;
+    border-radius: 10px;
+    cursor: pointer;
+    opacity: 0.85;
+    transition: transform 0.22s ease, opacity 0.22s ease, box-shadow 0.22s ease;
+    border: 2px solid transparent;
+    box-shadow: 0 3px 10px rgba(0,0,0,0.06);
+}
+
+.miniaturas_index_servicios img:hover,
+.miniaturas_index_servicios img.activa_index_servicios {
+    transform: translateY(-4px);
+    opacity: 1;
+    border-color: rgba(34,34,34,0.06);
+    box-shadow: 0 6px 18px rgba(0,0,0,0.08);
+}
+
+@media (max-width: 768px) {
+    .img-principal_index_servicios {
+        height: 260px;
+    }
+    .miniaturas_index_servicios img {
+        width: 70px;
+        height: 54px;
+    }
+}
+
+.info_index_servicios h4 {
+    font-size: 20px;
+    margin-bottom: 12px;
+}
+
+.info_index_servicios p {
+    font-size: 15px;
+    color: #444;
+    margin-bottom: 8px;
+}
+
+.info_index_servicios strong {
+    color: #111;
+}
+
+.info_index_servicios .text-success {
+    color: #198754 !important;
+    font-weight: 700;
+}
+
+.info_index_servicios .badge {
+    font-size: 14px;
+    padding: 8px 10px;
+    border-radius: 14px;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    box-shadow: 0 3px 8px rgba(0,0,0,0.06);
+}
+
+.badge.bg-success {
+    background-color: #198754 !important;
+    color: #fff !important;
+}
+
+.politicas-contenedor_index_servicios {
+    background-color: #ffffff;
+    border-left: 4px solid #ffc107;
+    border-radius: 10px;
+    padding: 24px;
+}
+
+.politicas-contenedor_index_servicios h5 {
+    font-size: 18px;
+    color: #d39e00;
+    margin-bottom: 14px;
+}
+
+.lista-politicas_index_servicios {
+    list-style: none;
+    padding: 0;
+    margin: 0 0 24px 0;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px,1fr));
+    gap: 12px;
+}
+
+.lista-politicas_index-servicios li,
+.lista-politicas_index_servicios li {
+    background-color: #ffffff;
+    border: 1px solid #e6e6e6;
+    border-radius: 8px;
+    padding: 10px 14px;
+    font-size: 14px;
+    color: #333;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.03);
+    transition: background 0.2s ease;
+}
+
+.lista-politicas_index_servicios li i {
+    color: #d39e00;
+    min-width: 20px;
+    text-align: center;
+}
+
+.btn-reservar_index_servicios {
+    background: linear-gradient(135deg, #ffc107, #ffca2c);
+    color: #222;
+    border: none;
+    border-radius: 12px;
+    padding: 14px 20px;
+    font-size: 16px;
+    font-weight: 700;
+    text-align: center;
+    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.1);
+    transition: all 0.3s ease;
+    width: 100%;
+    display: inline-block;
+}
+
+.btn-reservar_index_servicios:hover {
+    background: linear-gradient(135deg, #e0a800, #f2bd00);
+    color: #fff;
+    transform: translateY(-1px);
+    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.15);
+}
+
+
+.recomendacion_index_servicios {
+    background-color: #fff;
+    border: 1px solid #e6e6e6;
+    border-radius: 10px;
+}
+
+.recomendacion_index_servicios .recomendacion-imagen img {
+    border-radius: 8px;
+}
+
+.recomendacion_index_servicios .recomendacion-detalles h6 {
+    color: #d39e00;
+    font-size: 16px;
+    margin-bottom: 8px;
+}
+
+.recomendacion_index_servicios .recomendacion-detalles p {
+    font-size: 14px;
+    color: #444;
+    margin-bottom: 4px;
+}
+
+.recomendacion_index_servicios .recomendacion-detalles .badge {
+    padding: 6px 8px;
+    font-size: 12px;
+}
+
+/* ---------- MODAL DE RESERVA ---------- */
+.modal-reserva-tabla_index_servicios {
+    font-family: "Segoe UI", sans-serif;
+    border-radius: 10px;
+    border: none;
+    box-shadow: 0 8px 40px rgba(0, 0, 0, 0.2);
+    color: #222;
+}
+
+.modal-reserva-tabla_index_servicios .modal-header {
+    font-size: 20px;
+    font-weight: 600;
+    padding: 0.9rem 1.2rem;
+}
+
+.linea-divisoria_index_servicios {
+    border: none;
+    height: 1px;
+    background: rgba(0,0,0,0.06);
+    margin: 12px 0;
+}
+
+.subtitulo_index_servicios {
+    font-size: 16px;
+    color: #111;
+}
+
+.texto-base_index_servicios {
+    font-size: 14px;
+    color: #444;
+}
+
+.texto-total_index_servicios {
+    font-size: 18px;
+    color: #111;
+}
+
+.tabla-resumen_index_servicios .row {
+    border-color: rgba(0,0,0,0.06);
+}
+
+.border-end {
+    border-color: rgba(0,0,0,0.06) !important;
+}
+
+.btn-cancelar_index_servicios {
+    background-color: #6c757d;
+    color: #fff;
+    border: none;
+    font-size: 14px;
+    border-radius: 6px;
+    padding: 8px 18px;
+}
+
+.btn-cancelar_index_servicios:hover {
+    background-color: #5a6268;
+}
+
+.btn-confirmar_index_servicios {
+    background-color: #ffc107;
+    color: #111;
+    border: none;
+    font-weight: 700;
+    border-radius: 6px;
+    padding: 8px 18px;
+}
+
+.btn-confirmar_index_servicios:hover {
+    background-color: #e0a800;
+}
+
+.modal-reserva-tabla_index_servicios i {
+    color: #d39e00;
+}
+
+@media (max-width: 991.98px) {
+    .img-principal_index-servicios {
+        height: 320px;
+    }
+    .titulo-detalle_index_servicios {
+        font-size: 26px;
+    }
+}
+
+@media (max-width: 767.98px) {
+    .row.mt-5.gy-4 {
+        gap: 18px;
+    }
+    .img-principal_index_servicios {
+        height: 240px;
+    }
+    .lista-politicas_index_servicios {
+        grid-template-columns: 1fr !important;
+    }
+}
+
+.carousel-control-prev-icon,
+.carousel-control-next-icon {
+    background-color: #f1c40f;
+    border-radius: 50%;
+    padding: 10px;
+    filter: none;
+}
+
+.carousel-control-prev,
+.carousel-control-next {
+    opacity: 1;
+}

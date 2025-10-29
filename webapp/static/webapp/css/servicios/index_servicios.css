@@ -1,0 +1,261 @@
+/* ---------- TARJETA DE HOSPEDAJE MEJORADA ---------- */
+.tarjeta_index_servicios {
+    background-color: #f9f7f4; /* fondo claro, elegante */
+    color: #333;
+    border-radius: 16px;
+    padding: 20px;
+    margin-bottom: 30px;
+    display: flex;
+    flex-direction: row;
+    align-items: flex-start;
+    gap: 20px;
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.1);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.tarjeta_index_servicios:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+}
+
+.imagen-contenedor_index_servicios {
+    flex-shrink: 0;
+    width: 250px;
+    height: 160px;
+    border-radius: 12px;
+    overflow: hidden;
+    background-color: #ddd;
+}
+
+.imagen-contenedor_index_servicios img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.detalle_index_servicios {
+    flex-grow: 1;
+    font-size: 15px;
+}
+
+.titulo_index_servicios {
+    font-size: 18px;
+    font-weight: bold;
+    color: #c89b00; /* dorado más sobrio */
+    margin-bottom: 8px;
+}
+
+/* Texto informativo */
+.detalle_index_servicios p {
+    margin-bottom: 6px;
+    color: #444;
+}
+
+/* Amenidades como etiquetas verdes */
+.badge-amenidad {
+    background-color: #198754;
+    font-size: 13px;
+    padding: 6px 12px;
+    border-radius: 20px;
+    color: #fff;
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    margin-right: 10px;
+    margin-bottom: 6px;
+}
+
+/* Botón de acción */
+.btn-vermas_index_servicios {
+    background-color: transparent;
+    border: 2px solid #6b8783;
+    color: #6b8783;
+    border-radius: 20px;
+    font-size: 14px;
+    padding: 6px 20px;
+    transition: all 0.3s ease;
+}
+
+.btn-vermas_index_servicios:hover {
+    background-color: #c89b00;
+    color: #fff;
+    border-color: #c89b00;
+}
+@media (max-width: 768px) {
+    .tarjeta_index_servicios {
+        flex-direction: column;
+        text-align: center;
+        padding: 16px;
+    }
+
+    .imagen-contenedor_index_servicios {
+        width: 100%;
+        height: 200px;
+    }
+
+    .badge-amenidad {
+        justify-content: center;
+        margin: 4px auto;
+    }
+
+    .detalle_index_servicios {
+        margin-top: 12px;
+    }
+}
+/* ==========================================
+   🔍 BARRA DE BÚSQUEDA - RealDeCuenca
+   ========================================== */
+.busqueda_index_servicios {
+    background-color: #f4f1ec;
+    border: 1px solid #e3dcd0;
+    border-radius: 16px;
+    padding: 30px 20px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.06);
+    font-family: 'Segoe UI', sans-serif;
+}
+
+/* Contenedor de filtros */
+.filtros_index_servicios {
+    gap: 18px;
+    flex-wrap: wrap;
+    justify-content: center;
+}
+
+/* Campos del filtro */
+.campo_index_servicios {
+    position: relative;
+}
+
+/* Estilos generales para inputs y selects */
+.input_index_servicios {
+    border: 2px solid #c89b00;
+    border-radius: 30px;
+    padding: 10px 18px;
+    font-size: 15px;
+    color: #333;
+    background-color: #fff;
+    min-width: 180px;
+    transition: all 0.3s ease;
+}
+
+/* Indicador de calendario en campos de fecha */
+.input_index_servicios::-webkit-calendar-picker-indicator {
+    color: #c89b00;
+    opacity: 0.85;
+    cursor: pointer;
+}
+
+/* Interacción */
+.input_index_servicios:hover,
+.input_index_servicios:focus {
+    border-color: #b38800;
+    box-shadow: 0 0 8px rgba(200, 155, 0, 0.3);
+    outline: none;
+}
+
+/* Botón de búsqueda */
+.btn-buscar_index_servicios {
+    background-color: #c89b00;
+    color: #fff;
+    border: none;
+    border-radius: 50%;
+    width: 48px;
+    height: 48px;
+    font-size: 18px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.3s ease;
+}
+
+.btn-buscar_index_servicios:hover {
+    background-color: #b38800;
+    transform: scale(1.05);
+}
+
+/* Responsivo */
+@media (max-width: 768px) {
+    .filtros_index_servicios {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .input_index_servicios {
+        min-width: 100%;
+        border-radius: 20px;
+    }
+
+    .btn-buscar_index_servicios {
+        margin-top: 12px;
+        align-self: center;
+    }
+}
+/* ===========================
+   LOADER ANIMADO (CDN-FRIENDLY)
+============================ */
+.loader-overlay {
+    position: fixed;
+    bottom: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: rgba(255, 255, 255, 0.9);
+    padding: 15px 30px;
+    border-radius: 12px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    z-index: 9999;
+    text-align: center;
+    animation: fadeIn 0.3s ease-in-out;
+}
+
+.spinner {
+    border: 5px solid #e0e0e0;
+    border-top: 5px solid #00a8a8;
+    border-radius: 50%;
+    width: 50px;
+    height: 50px;
+    margin: 0 auto 10px;
+    animation: spin 1s linear infinite;
+}
+
+.loader-text {
+    color: #333;
+    font-weight: 500;
+    font-size: 14px;
+    animation: pulse 1.5s ease-in-out infinite;
+}
+
+@keyframes spin {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+}
+
+@keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.6; }
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+/* ===============================
+           EFECTO FADE + ZOOM EN IMÁGENES
+        =============================== */
+.imagen-fade {
+    opacity: 0;
+    transform: scale(0.97);
+    transition: all 0.7s ease-in-out;
+}
+
+.imagen-fade.loaded {
+    opacity: 1;
+    transform: scale(1);
+}
+
+/* Opción extra: animación al hacer hover */
+.imagen-contenedor_index_servicios:hover img {
+    transform: scale(1.05);
+    transition: transform 0.4s ease;
+}
+

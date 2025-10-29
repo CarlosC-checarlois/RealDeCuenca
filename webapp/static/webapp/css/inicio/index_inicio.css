@@ -1,0 +1,313 @@
+/* ===================================================
+   ESTILO PRINCIPAL - SECCIÓN INICIO
+   Nomenclatura: _index_inicio_
+   =================================================== */
+
+/* ---------- HERO / PORTADA ---------- */
+.hero-section_index_inicio {
+    position: relative;
+    height: 100vh;
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    background-color: #000;
+}
+
+.hero-bg_index_inicio {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    filter: brightness(0.85) contrast(1.05);
+    z-index: 0;
+}
+
+.overlay_index_inicio {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(180deg, rgba(0, 0, 0, 0.45) 0%, rgba(0, 0, 0, 0.8) 100%);
+    z-index: 1;
+}
+
+.hero-content_index_inicio {
+    position: relative;
+    z-index: 2;
+    animation: fadeInUp_index_inicio 1.2s ease both;
+}
+
+.titulo_index_inicio {
+    font-size: 22px; /* Según estándar PUCE */
+    letter-spacing: 2px;
+    color: #FFD700;
+    text-transform: uppercase;
+    text-shadow: 2px 2px 6px rgba(0, 0, 0, 0.7);
+}
+
+.subtitulo_index_inicio {
+    font-size: 14px;
+    font-weight: 300;
+    color: #fff;
+    letter-spacing: 1px;
+    margin-top: 10px;
+}
+
+/* Animación de entrada */
+@keyframes fadeInUp_index_inicio {
+    from {
+        opacity: 0;
+        transform: translateY(25px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* ---------- SECCIÓN NOSOTROS ---------- */
+.nosotros_index_inicio {
+    background: #f8f8f8;
+    color: #333;
+}
+
+.titulo-nosotros_index_inicio {
+    font-size: 18px;
+    font-weight: 600;
+    color: #444;
+    position: relative;
+}
+
+.titulo-nosotros_index_inicio::after {
+    content: "";
+    display: block;
+    width: 60px;
+    height: 3px;
+    background-color: #FFD700;
+    margin: 12px auto 20px;
+    border-radius: 3px;
+}
+
+.texto-nosotros_index_inicio {
+    font-size: 14px;
+    line-height: 1.8;
+    color: #555;
+    max-width: 800px;
+    text-align: justify;
+    animation: fadeInUp_index_inicio 1.4s ease;
+}
+
+/* ---------- SECCIÓN SERVICIOS ---------- */
+.servicios_index_inicio {
+    background: linear-gradient(0deg, #111 0%, #000 100%);
+}
+
+.titulo-servicios_index_inicio {
+    font-size: 18px;
+    font-weight: 600;
+    color: #FFD700;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+.titulo-servicios_index_inicio::after {
+    content: "";
+    display: block;
+    width: 60px;
+    height: 3px;
+    background-color: #FFD700;
+    margin: 10px auto;
+    border-radius: 3px;
+}
+
+.card_index_inicio {
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 12px;
+    transition: all 0.4s ease;
+    overflow: hidden;
+    box-shadow: 0 5px 20px rgba(0, 0, 0, 0.3);
+}
+
+.card_index_inicio:hover {
+    transform: translateY(-8px);
+    box-shadow: 0 10px 25px rgba(255, 215, 0, 0.2);
+    border-color: #FFD700;
+}
+
+.img_index_inicio {
+    width: 100%;
+    height: 250px;
+    object-fit: cover;
+    transition: transform 0.4s ease;
+}
+
+.card_index_inicio:hover .img_index_inicio {
+    transform: scale(1.05);
+}
+
+.contenido-card_index_inicio {
+    padding: 15px;
+}
+
+.titulo-card_index_inicio {
+    font-size: 16px;
+    font-weight: 600;
+    color: #FFD700;
+}
+
+.texto-card_index_inicio {
+    font-size: 14px;
+    color: #ddd;
+    opacity: 0.9;
+}
+
+/* ---------- Responsive ---------- */
+@media (max-width: 768px) {
+    .hero-section_index_inicio {
+        height: 75vh;
+    }
+
+    .titulo_index_inicio {
+        font-size: 18px;
+    }
+
+    .subtitulo_index_inicio {
+        font-size: 13px;
+    }
+
+    .img_index_inicio {
+        height: 200px;
+    }
+
+    .titulo-nosotros_index_inicio,
+    .titulo-servicios_index_inicio {
+        font-size: 16px;
+    }
+}
+/* ==========================================
+   SECCIÓN HISTORIA
+   ========================================== */
+.historia_index_inicio {
+    background: linear-gradient(180deg, #111 0%, #000 100%);
+}
+
+.titulo-historia_index_inicio {
+    font-size: 18px;
+    font-weight: 600;
+    color: #FFD700;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+.titulo-historia_index_inicio::after {
+    content: "";
+    display: block;
+    width: 70px;
+    height: 3px;
+    background-color: #FFD700;
+    margin: 10px auto 20px;
+    border-radius: 2px;
+}
+
+.texto-historia_index_inicio {
+    font-size: 14px;
+    color: #ddd;
+    line-height: 1.8;
+    max-width: 850px;
+    margin-bottom: 20px;
+}
+
+/* ==========================================
+   SECCIÓN INSPIRACIÓN
+   ========================================== */
+.inspiracion_index_inicio {
+    background: #fdfdfd;
+    color: #222;
+}
+
+.titulo-inspiracion_index_inicio {
+    font-size: 18px;
+    font-weight: 600;
+    color: #333;
+}
+
+.titulo-inspiracion_index_inicio::after {
+    content: "";
+    display: block;
+    width: 70px;
+    height: 3px;
+    background-color: #FFD700;
+    margin: 10px auto 25px;
+    border-radius: 2px;
+}
+
+.texto-inspiracion_index_inicio {
+    font-size: 14px;
+    color: #555;
+    line-height: 1.8;
+    max-width: 850px;
+    text-align: justify;
+    margin-bottom: 15px;
+}
+
+/* ==========================================
+   SECCIÓN VALORES
+   ========================================== */
+.valores_index_inicio {
+    background: linear-gradient(180deg, #1a1a1a 0%, #000 100%);
+}
+
+.titulo-valores_index_inicio {
+    font-size: 18px;
+    font-weight: 600;
+    color: #FFD700;
+    text-transform: uppercase;
+}
+
+.valor-item_index_inicio {
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 14px;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+}
+
+.valor-item_index_inicio:hover {
+    transform: translateY(-6px);
+    border-color: #FFD700;
+    box-shadow: 0 8px 25px rgba(255, 215, 0, 0.25);
+}
+
+.icono-valores_index_inicio {
+    font-size: 40px;
+    color: #FFD700;
+}
+
+.valor-titulo_index_inicio {
+    font-size: 16px;
+    font-weight: 600;
+    color: #FFD700;
+}
+
+.valor-texto_index_inicio {
+    font-size: 14px;
+    color: #ddd;
+    line-height: 1.6;
+}
+
+/* ==========================================
+   RESPONSIVE
+   ========================================== */
+@media (max-width: 768px) {
+    .texto-historia_index_inicio,
+    .texto-inspiracion_index_inicio,
+    .valor-texto_index_inicio {
+        font-size: 13px;
+    }
+}
